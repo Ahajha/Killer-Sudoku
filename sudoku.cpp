@@ -265,8 +265,8 @@ void Sudoku::gateInitial(){
       for (std::size_t j = 0; j < gridSize; ++j) {
           _gates[i][j] = new Gate[gridSize];
           for (std::size_t k = 0; k < gridSize; ++k) {
-        Var v = _solver.newVar();
-        _gates[i][j][k].setVar(v);
+            Var v = _solver.newVar();
+            _gates[i][j][k].setVar(v);
           }
       }
     }

@@ -6,8 +6,6 @@
 #include "color.h"
 #include "gate.h"
 
-#define UNASSIGNED 0
-
 struct Position {
     size_t x, y;
     int val;
@@ -20,17 +18,11 @@ const size_t maxCageSizeMinus1 = 5; //gridSize - 4;
 
 class Cage {
 public:
-    Cage(std::vector<Position>& e){
-        _cageId = -1;
-        _sum = 0;
-        _eles = e;
-    }
-    Cage(int i, int s, std::vector<Position> &e) {
-        _cageId = i;
-        _sum = s;
-        _eles = e;
-    }
-    ~Cage(){}
+    Cage(std::vector<Position> e) : _eles{std::move(e)} {}
+    Cage(int i, int s, std::vector<Position> e) :
+        _cageId{i},
+        _sum{s},
+        _eles{std::move(e)} {}
 
     int getSum() const { return _sum; }
     int getID() const { return _cageId; }
@@ -57,8 +49,8 @@ public:
     }
 
 private:
-    int _cageId;
-    int _sum;
+    int _cageId{-1};
+    int _sum{0};
     std::vector<Position> _eles;
     Gate _g;
 };
