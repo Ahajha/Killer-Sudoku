@@ -5,6 +5,7 @@
 #include <array>
 
 #include "gate.h"
+#include "sat.h"
 
 struct Position {
     size_t x, y;
@@ -32,7 +33,7 @@ public:
     Gate& getGate() {return _g;}
     void setGate(SatSolver& s) {
         Var v = s.newVar();
-        _g.setVar(v);
+        _g = v;
     }
     bool addEle(Position e, int i) {
         if(getCageSize() > maxCageSizeMinus1){

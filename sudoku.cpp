@@ -254,7 +254,7 @@ void Sudoku::gateInitial(SatSolver& solver, Gates& gates){
       for (std::size_t j = 0; j < gridSize; ++j) {
           for (std::size_t k = 0; k < gridSize; ++k) {
             Var v = solver.newVar();
-            gates[i][j][k].setVar(v);
+            gates[i][j][k] = v;
           }
       }
     }
@@ -266,7 +266,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     for (std::size_t j = 0; j < gridSize; ++j) {
         for (std::size_t i = 0; i < gridSize; ++i) {
           for (std::size_t k = 0; k < gridSize; ++k) {
-        lits.push(Lit(gates[i][j][k].getVar()));
+            lits.push(Lit(gates[i][j][k]));
           }
           solver.addCNF(lits);
           lits.clear();
@@ -276,8 +276,8 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
         for (std::size_t i = 0; i < gridSize; ++i) {
           for (std::size_t k = 0; k < gridSize - 1; ++k) {
             for (std::size_t z = k + 1; z < gridSize; ++z) {
-                lits.push(~Lit(gates[i][j][k].getVar()));
-                lits.push(~Lit(gates[i][j][z].getVar()));
+                lits.push(~Lit(gates[i][j][k]));
+                lits.push(~Lit(gates[i][j][z]));
                 solver.addCNF(lits);
                 lits.clear();
             }
@@ -290,8 +290,8 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
         for (std::size_t k = 0; k < gridSize; ++k) {
           for (std::size_t i = 0; i < gridSize - 1; ++i) {
             for (std::size_t q = i + 1; q < gridSize; ++q) {
-                lits.push(~Lit(gates[i][j][k].getVar()));
-                lits.push(~Lit(gates[q][j][k].getVar()));
+                lits.push(~Lit(gates[i][j][k]));
+                lits.push(~Lit(gates[q][j][k]));
                 solver.addCNF(lits);
                 lits.clear();
             }
@@ -304,8 +304,8 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
         for (std::size_t k = 0; k < gridSize; ++k) {
           for (std::size_t j = 0; j < gridSize - 1; ++j) {
             for (std::size_t q = j + 1; q < gridSize; ++q) {
-                lits.push(~Lit(gates[i][j][k].getVar()));
-                lits.push(~Lit(gates[i][q][k].getVar()));
+                lits.push(~Lit(gates[i][j][k]));
+                lits.push(~Lit(gates[i][q][k]));
                 solver.addCNF(lits);
                 lits.clear();
             }
@@ -321,9 +321,9 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
                 for (std::size_t j = 0; j < boxSize; ++j) {
                     for (std::size_t s = j + 1; s < boxSize; ++s) {
                       lits.push(
-                          ~Lit(gates[boxSize * q + i][boxSize * r + j][k].getVar()));
+                          ~Lit(gates[boxSize * q + i][boxSize * r + j][k]));
                       lits.push(
-                          ~Lit(gates[boxSize * q + i][boxSize * r + s][k].getVar()));
+                          ~Lit(gates[boxSize * q + i][boxSize * r + s][k]));
                       solver.addCNF(lits);
                       lits.clear();
                     }
@@ -342,10 +342,10 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
                       for (std::size_t t = 0; t < boxSize; ++t) {
                         lits.push(
                             ~Lit(gates[boxSize * q + i][boxSize * r + j][k]
-                                     .getVar()));
+                                     ));
                         lits.push(
                             ~Lit(gates[boxSize * q + s][boxSize * r + t][k]
-                                     .getVar()));
+                                     ));
                         solver.addCNF(lits);
                         lits.clear();
                       }
@@ -369,8 +369,8 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
          // each num appears at most once in the cage
          for(size_t s=it->getCageSize()-1, i=0; i<s; ++i){
             for(int k=0; k<9; ++k){
-                lits.push(~Lit(gates[it->getPox(i)][it->getPoy(i)][k].getVar()));
-                lits.push(~Lit(gates[it->getPox(i+1)][it->getPoy(i+1)][k].getVar()));
+                lits.push(~Lit(gates[it->getPox(i)][it->getPoy(i)][k]));
+                lits.push(~Lit(gates[it->getPox(i+1)][it->getPoy(i+1)][k]));
                 solver.addCNF(lits); lits.clear();
             }
          }
@@ -385,7 +385,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
              if(ans->size() == cs){
                  do{
                     for(size_t i=0; i<cs; ++i){
-                        lits.push(Lit(gates[it->getPox(i)][it->getPoy(i)][(*ans)[i]-1].getVar()));
+                        lits.push(Lit(gates[it->getPox(i)][it->getPoy(i)][(*ans)[i]-1]));
                     }
                     Var v = solver.newVar();
                     solver.addAND(v, lits); lits.clear();
@@ -394,7 +394,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
                  }while(next_permutation(ans->begin(), ans->end()));
              }
          }
-         solver.addOR(it->getGate().getVar(), validSols);
+         solver.addOR(it->getGate(), validSols);
      }
 
 }
@@ -429,7 +429,7 @@ void Sudoku::solveBySAT(){
 
     // letting all sum condition be true
     for (std::size_t i = 0, s = _cages.size(); i < s; ++i) {
-         solver.assumeProperty(_cages[i].getGate().getVar(), true);
+         solver.assumeProperty(_cages[i].getGate(), true);
     }
     // solver.assumeProperty(newV, true);  // k = 1
     start = clock();
@@ -445,7 +445,7 @@ void Sudoku::solveBySAT(){
          for (std::size_t i = 0, n = gridSize; i < n; ++i) {
              for (std::size_t j = 0; j < gridSize; ++j) {
                  for (std::size_t k = 0; k < gridSize; ++k) {
-                    if(solver.getValue(gates[i][j][k].getVar())){
+                    if(solver.getValue(gates[i][j][k])){
                         _grid[i][j] = k+1;
                         break;
                     }
