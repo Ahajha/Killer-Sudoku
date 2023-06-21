@@ -2,6 +2,7 @@
 #define SUDOKU_H
 
 #include <vector>
+#include <array>
 
 #include "color.h"
 #include "gate.h"
@@ -57,16 +58,18 @@ private:
 
 class Sudoku {
 private:
-  int _grid[gridSize][gridSize];
-  int _solnGrid[gridSize][gridSize];
-  int _cageId[gridSize][gridSize];
+  std::array<std::array<int, gridSize>, gridSize> _grid;
+  std::array<std::array<int, gridSize>, gridSize> _solnGrid;
+  std::array<std::array<int, gridSize>, gridSize> _cageId;
   std::vector<Cage> _cages;
-  Gate*** _gates;
+
+  using Gates =
+      std::array<std::array<std::array<Gate, gridSize>, gridSize>, gridSize>;
 
   static Color _color;
 
-  void gateInitial();
-  void genProofModel();
+  void gateInitial(Gates& gates);
+  void genProofModel(Gates& gates);
   void subsetSum(std::vector<int> numbers, const int &s, const int &target,
                  std::vector<int> partial,
                  std::vector<std::vector<int>> &answer);

@@ -48,6 +48,12 @@ Sudoku::Sudoku()
       _cageId[i][j] = -1;
     }
   }
+
+  _solver.initialize();
+
+  for (size_t s = _cages.size(), i = 0; i < s; ++i) {
+    _cages[i].setGate(_solver);
+  }
 }
 // END: Initialising
 
@@ -255,34 +261,24 @@ bool sortGrid(const Position& a, const Position& b){
     return (a.y != b.y)?(a.y < b.y):(a.x < b.x);
 }
 
-void Sudoku::gateInitial(){
-
-    _solver.initialize();
-    _gates = new Gate**[gridSize];
-
+void Sudoku::gateInitial(Gates& gates){
     for (std::size_t i = 0; i < gridSize; ++i) {
-      _gates[i] = new Gate *[gridSize];
       for (std::size_t j = 0; j < gridSize; ++j) {
-          _gates[i][j] = new Gate[gridSize];
           for (std::size_t k = 0; k < gridSize; ++k) {
             Var v = _solver.newVar();
-            _gates[i][j][k].setVar(v);
+            gates[i][j][k].setVar(v);
           }
       }
     }
-
-    for(size_t s = _cages.size(), i=0; i<s; ++i){
-        _cages[i].setGate(_solver);
-    }
 }
 
-void Sudoku::genProofModel(){
+void Sudoku::genProofModel(Gates& gates){
     vec<Lit> lits;
     // entry condition
     for (std::size_t j = 0; j < gridSize; ++j) {
         for (std::size_t i = 0; i < gridSize; ++i) {
           for (std::size_t k = 0; k < gridSize; ++k) {
-        lits.push(Lit(_gates[i][j][k].getVar()));
+        lits.push(Lit(gates[i][j][k].getVar()));
           }
           _solver.addCNF(lits);
           lits.clear();
@@ -292,8 +288,8 @@ void Sudoku::genProofModel(){
         for (std::size_t i = 0; i < gridSize; ++i) {
           for (std::size_t k = 0; k < gridSize - 1; ++k) {
             for (std::size_t z = k + 1; z < gridSize; ++z) {
-                lits.push(~Lit(_gates[i][j][k].getVar()));
-                lits.push(~Lit(_gates[i][j][z].getVar()));
+                lits.push(~Lit(gates[i][j][k].getVar()));
+                lits.push(~Lit(gates[i][j][z].getVar()));
                 _solver.addCNF(lits);
                 lits.clear();
             }
@@ -306,8 +302,8 @@ void Sudoku::genProofModel(){
         for (std::size_t k = 0; k < gridSize; ++k) {
           for (std::size_t i = 0; i < gridSize - 1; ++i) {
             for (std::size_t q = i + 1; q < gridSize; ++q) {
-                lits.push(~Lit(_gates[i][j][k].getVar()));
-                lits.push(~Lit(_gates[q][j][k].getVar()));
+                lits.push(~Lit(gates[i][j][k].getVar()));
+                lits.push(~Lit(gates[q][j][k].getVar()));
                 _solver.addCNF(lits);
                 lits.clear();
             }
@@ -320,8 +316,8 @@ void Sudoku::genProofModel(){
         for (std::size_t k = 0; k < gridSize; ++k) {
           for (std::size_t j = 0; j < gridSize - 1; ++j) {
             for (std::size_t q = j + 1; q < gridSize; ++q) {
-                lits.push(~Lit(_gates[i][j][k].getVar()));
-                lits.push(~Lit(_gates[i][q][k].getVar()));
+                lits.push(~Lit(gates[i][j][k].getVar()));
+                lits.push(~Lit(gates[i][q][k].getVar()));
                 _solver.addCNF(lits);
                 lits.clear();
             }
@@ -337,9 +333,9 @@ void Sudoku::genProofModel(){
                 for (std::size_t j = 0; j < boxSize; ++j) {
                     for (std::size_t s = j + 1; s < boxSize; ++s) {
                       lits.push(
-                          ~Lit(_gates[boxSize * q + i][boxSize * r + j][k].getVar()));
+                          ~Lit(gates[boxSize * q + i][boxSize * r + j][k].getVar()));
                       lits.push(
-                          ~Lit(_gates[boxSize * q + i][boxSize * r + s][k].getVar()));
+                          ~Lit(gates[boxSize * q + i][boxSize * r + s][k].getVar()));
                       _solver.addCNF(lits);
                       lits.clear();
                     }
@@ -357,10 +353,10 @@ void Sudoku::genProofModel(){
                     for (std::size_t s = i + 1; s < boxSize; ++s) {
                       for (std::size_t t = 0; t < boxSize; ++t) {
                         lits.push(
-                            ~Lit(_gates[boxSize * q + i][boxSize * r + j][k]
+                            ~Lit(gates[boxSize * q + i][boxSize * r + j][k]
                                      .getVar()));
                         lits.push(
-                            ~Lit(_gates[boxSize * q + s][boxSize * r + t][k]
+                            ~Lit(gates[boxSize * q + s][boxSize * r + t][k]
                                      .getVar()));
                         _solver.addCNF(lits);
                         lits.clear();
@@ -401,7 +397,7 @@ void Sudoku::genProofModel(){
              if(ans->size() == cs){
                  do{
                     for(size_t i=0; i<cs; ++i){
-                        lits.push(Lit(_gates[it->getPox(i)][it->getPoy(i)][(*ans)[i]-1].getVar()));
+                        lits.push(Lit(gates[it->getPox(i)][it->getPoy(i)][(*ans)[i]-1].getVar()));
                     }
                     Var v = _solver.newVar();
                     _solver.addAND(v, lits); lits.clear();
@@ -416,11 +412,13 @@ void Sudoku::genProofModel(){
 }
 
 void Sudoku::solveBySAT(){
-    gateInitial();
+    Gates gates;
+
+    gateInitial(gates);
 
     clock_t start, end;
     start = clock();
-    genProofModel();
+    genProofModel(gates);
     end = clock();
 
     double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
@@ -452,7 +450,7 @@ void Sudoku::solveBySAT(){
          for (std::size_t i = 0, n = gridSize; i < n; ++i) {
              for (std::size_t j = 0; j < gridSize; ++j) {
                  for (std::size_t k = 0; k < gridSize; ++k) {
-                    if(_solver.getValue(_gates[i][j][k].getVar())){
+                    if(_solver.getValue(gates[i][j][k].getVar())){
                         _grid[i][j] = k+1;
                         break;
                     }
@@ -467,14 +465,6 @@ void Sudoku::solveBySAT(){
              }
          }
     }
-
-    for (std::size_t i = 0; i < gridSize; ++i) {
-         for (std::size_t j = 0; j < gridSize; ++j) {
-             delete[] _gates[i][j];
-         }
-         delete[] _gates[i];
-    }
-    delete [] _gates;
 }
 
 void Sudoku::subsetSum(std::vector<int> numbers, const int &s,
