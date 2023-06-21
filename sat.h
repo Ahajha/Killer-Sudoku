@@ -102,9 +102,26 @@ class SatSolver
       // Functions about Reporting
       // Return 1/0/-1; -1 means unknown value
       int getValue(Var v) const {
-         return (_solver->modelValue(v)==l_True?1:
-                (_solver->modelValue(v)==l_False?0:-1)); }
-      void printStats() const { const_cast<Solver*>(_solver.get())->printStats(); }
+         return (_solver->model[v]==l_True?1:
+                (_solver->model[v]==l_False?0:-1)); }
+      void printStats() const {
+        const auto& stats = _solver->stats;
+         reportf("==============================[MINISAT]");
+         reportf("===============================\n");
+         reportf("| Conflicts |     ORIGINAL     |          ");
+         reportf("LEARNT          | Progress |\n");
+         reportf("|           | Clauses Literals | Clauses ");
+         reportf("Literals  Lit/Cl |          |\n");
+         reportf("=======================================");
+         reportf("===============================\n");
+         reportf("| %9d | %7d %8d | %7d %8d %7.1f | %6.3f %% |\n",
+                 (int)stats.conflicts, _solver->nClauses(), (int)stats.clauses_literals,
+                 _solver->nLearnts(), (int)stats.learnts_literals,
+                 (double)stats.learnts_literals / _solver->nLearnts(),
+                 _solver->progress_estimate * 100);
+         reportf("=======================================");
+         reportf("===============================\n");
+      }
 
    private : 
       std::unique_ptr<Solver>_solver;    // Pointer to a Minisat solver
