@@ -4,7 +4,6 @@
 #include <vector>
 #include <array>
 
-#include "color.h"
 #include "gate.h"
 
 struct Position {
@@ -59,14 +58,12 @@ private:
 class Sudoku {
 private:
   std::array<std::array<int, gridSize>, gridSize> _grid;
-  std::array<std::array<int, gridSize>, gridSize> _solnGrid;
+  //std::array<std::array<int, gridSize>, gridSize> _solnGrid;
   std::array<std::array<int, gridSize>, gridSize> _cageId;
   std::vector<Cage> _cages;
 
   using Gates =
       std::array<std::array<std::array<Gate, gridSize>, gridSize>, gridSize>;
-
-  static Color _color;
 
   void gateInitial(SatSolver &solver, Gates &gates);
   void genProofModel(SatSolver &solver, Gates &gates);

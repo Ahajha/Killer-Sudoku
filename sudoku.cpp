@@ -1,4 +1,5 @@
 #include "sudoku.h"
+#include "color.h"
 
 #include <algorithm>
 #include <fstream>
@@ -29,11 +30,7 @@ void Sudoku::createSeed()
   this->solveBySAT();
   
   // Saving the solution grid
-  for (std::size_t i = 0; i < gridSize; i++) {
-    for (std::size_t j = 0; j < gridSize; j++) {
-      _solnGrid[i][j] = _grid[i][j];
-    }
-  }
+  //_solnGrid = _grid;
 }
 // END: Create seed grid
 
@@ -205,7 +202,7 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
         std::size_t y = 50*i;
 
         std::stringstream text;
-        text << "<rect x=\""<<x<<"\" y=\""<<y<<"\" width=\"50\" height=\"50\" style=\"fill:" << _color[_cageId[i][j]] <<";opacity:"<< _color.opacity(_cageId[i][j]) << "\"/>\n";
+        text << "<rect x=\""<<x<<"\" y=\""<<y<<"\" width=\"50\" height=\"50\" style=\"fill:" << colors[_cageId[i][j]] <<";opacity:"<< opacity(_cageId[i][j]) << "\"/>\n";
         if(printSol){
             text<<"<text x=\""<<x+16<<"\" y=\""<<y+35<<"\" style=\"font-weight:bold\" font-size=\"30px\">"<<_grid[i][j]<<"</text>\n";
         }
@@ -247,9 +244,6 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
   outFile.close();
 }
 // END: Printing into SVG file
-
-// Initialization for color
-Color Sudoku::_color = Color();
 
 bool sortGrid(const Position& a, const Position& b){
     return (a.y != b.y)?(a.y < b.y):(a.x < b.x);
