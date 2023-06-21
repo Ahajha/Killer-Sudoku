@@ -25,7 +25,7 @@ public:
     ~Color(){}
 
     std::string operator [] (int n) const { return _colorList[n%12]; }
-    float opacity (int n) const { return (n/12)%2?0.3:1.0; }
+    float opacity (int n) const { return n % 2 ? 0.3f : 1.0f; }
 };
 
 #endif

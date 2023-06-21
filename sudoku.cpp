@@ -73,8 +73,7 @@ void Sudoku::printGrid()
 // START: Gneerate puzzle
 void Sudoku::genPuzzle()
 {
-  size_t sum, sizeOfCage, dir, extPo, currentID, pox, poy;
-  int deadLock, gridValue;
+  size_t dir;
   std::vector<int> cageAppeared;
   for (std::size_t j = 0; j < gridSize; ++j) {
     for (std::size_t i = 0; i < gridSize; ++i) {
@@ -82,14 +81,14 @@ void Sudoku::genPuzzle()
         continue;
       }
 
-      deadLock = 0;
+      int deadLock = 0;
       cageAppeared.clear();
-      sizeOfCage = rand() % maxCageSizeMinus1 + 2;
-      currentID = _cages.size();
+      std::size_t sizeOfCage = rand() % maxCageSizeMinus1 + 2;
+      int currentID = static_cast<int>(_cages.size());
 
       _cageId[i][j] = currentID;
 
-      sum = _grid[i][j];
+      int sum = _grid[i][j];
 
       std::vector<Position> temp;
 
@@ -97,15 +96,15 @@ void Sudoku::genPuzzle()
       cageAppeared.push_back(sum);
 
       while (temp.size() < sizeOfCage && deadLock < 1) {
-        extPo = rand() % temp.size();
-        pox = temp[extPo].x;
-        poy = temp[extPo].y;
+        std::size_t extPo = rand() % temp.size();
+        std::size_t pox = temp[extPo].x;
+        std::size_t poy = temp[extPo].y;
 
-        dir = rand() % 2;
+        int dir = rand() % 2;
         switch (dir) {
         case 0:
           if (pox < 8 && _cageId[pox + 1][poy] < 0) {
-            gridValue = _grid[pox + 1][poy];
+            int gridValue = _grid[pox + 1][poy];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               temp.push_back({pox + 1, poy, gridValue});
@@ -117,7 +116,7 @@ void Sudoku::genPuzzle()
           }
         case 1:
           if (poy < 8 && _cageId[pox][poy + 1] < 0) {
-            gridValue = _grid[pox][poy + 1];
+            int gridValue = _grid[pox][poy + 1];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               temp.push_back({pox, poy + 1, gridValue});
@@ -129,7 +128,7 @@ void Sudoku::genPuzzle()
           }
         case 2:
           if (pox > 1 && _cageId[pox - 1][poy] < 0) {
-            gridValue = _grid[pox - 1][poy];
+            int gridValue = _grid[pox - 1][poy];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               temp.push_back({pox - 1, poy, gridValue});
@@ -141,7 +140,7 @@ void Sudoku::genPuzzle()
           }
         case 3:
           if (poy > 1 && _cageId[pox][poy - 1] < 0) {
-            gridValue = _grid[pox][poy - 1];
+            int gridValue = _grid[pox][poy - 1];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               temp.push_back({pox, poy - 1, gridValue});
@@ -202,8 +201,8 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
     for (std::size_t i = 0; i < gridSize; i++) {
       if(this->_grid[i][j]!=0)
       {
-        int x = 50*j;
-        int y = 50*i;
+        std::size_t x = 50*j;
+        std::size_t y = 50*i;
 
         std::stringstream text;
         text << "<rect x=\""<<x<<"\" y=\""<<y<<"\" width=\"50\" height=\"50\" style=\"fill:" << _color[_cageId[i][j]] <<";opacity:"<< _color.opacity(_cageId[i][j]) << "\"/>\n";
@@ -216,8 +215,8 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
   }
 
   for(auto it=_cages.begin(); it!=_cages.end(); ++it){
-      int x = 50* it->getPoy(0) + 8;
-      int y = 50* it->getPox(0) + 18;
+      std::size_t x = 50* it->getPoy(0) + 8;
+      std::size_t y = 50* it->getPox(0) + 18;
 
       std::stringstream text;
       text<<"<text x=\""<<x<<"\" y=\""<<y<<"\" style=\"font-weight:bold\" fill=\"red\" font-size=\"15px\">"<<it->getSum()<<"</text>\n";
@@ -377,7 +376,7 @@ void Sudoku::genProofModel(){
     std::vector<int> partial;
 
     for (std::size_t i = 1; i <= gridSize; ++i) {
-        numbers.push_back(i);
+        numbers.push_back(static_cast<int>(i));
     }
 
     // sum
