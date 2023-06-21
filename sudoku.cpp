@@ -202,7 +202,7 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
         std::size_t y = 50*i;
 
         std::stringstream text;
-        text << "<rect x=\""<<x<<"\" y=\""<<y<<"\" width=\"50\" height=\"50\" style=\"fill:" << colors[_cageId[i][j]] <<";opacity:"<< opacity(_cageId[i][j]) << "\"/>\n";
+        text << "<rect x=\""<<x<<"\" y=\""<<y<<"\" width=\"50\" height=\"50\" style=\"fill:" << colors[_cageId[i][j] % colors.size()] <<";opacity:"<< opacity(_cageId[i][j]) << "\"/>\n";
         if(printSol){
             text<<"<text x=\""<<x+16<<"\" y=\""<<y+35<<"\" style=\"font-weight:bold\" font-size=\"30px\">"<<_grid[i][j]<<"</text>\n";
         }
