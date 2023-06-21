@@ -420,7 +420,6 @@ void Sudoku::solveBySAT() {
   Gates gates;
 
   SatSolver solver;
-  solver.initialize();
 
   for (size_t s = _cages.size(), i = 0; i < s; ++i) {
     _cages[i].setGate(solver);
@@ -438,20 +437,19 @@ void Sudoku::solveBySAT() {
             << std::setprecision(5);
   std::cout << " sec " << std::endl;
 
-  bool result;
   // k = Solve(Gate(5) ^ !Gate(8))
   // Var newV = solver.newVar();
   // solver.addXorCNF(newV, gates[5]->getVar(), false, gates[8]->getVar(),
   // true);
-  solver.assumeRelease(); // Clear assumptions
-
+  
+  vec<Lit> assumptions;
   // letting all sum condition be true
   for (std::size_t i = 0, s = _cages.size(); i < s; ++i) {
-    solver.assumeProperty(_cages[i].getGate(), true);
+    assumptions.push(Lit{_cages[i].getGate()});
   }
   // solver.assumeProperty(newV, true);  // k = 1
   start = clock();
-  result = solver.assumpSolve();
+  bool result = solver.solve(assumptions);
   end = clock();
   time_taken = double(end - start) / double(CLOCKS_PER_SEC);
   std::cout << "Time taken by solver.assumpSolve() is : " << std::fixed
