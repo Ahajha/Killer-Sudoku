@@ -1,12 +1,11 @@
+#include <filesystem>
 #include <iostream>
 #include <string>
-#include <filesystem>
 
 #include "sudoku.h"
 
 // START: The main function
-int main([[maybe_unused]] int argc, char const *argv[])
-{
+int main([[maybe_unused]] int argc, char const *argv[]) {
   // Initialising seed for random number generation
   srand(time(NULL));
 
@@ -36,8 +35,7 @@ int main([[maybe_unused]] int argc, char const *argv[])
 
   puzzle.solveBySAT();
   puzzle.printSVG(path, "images/puzzles_solbySAT.svg", true);
-  // cout<<"The above sudoku puzzle has been stored in puzzles.svg in current folder\n";
-  // freeing the memory
-  // puzzle->printGrid();
+  // cout<<"The above sudoku puzzle has been stored in puzzles.svg in current
+  // folder\n"; freeing the memory puzzle->printGrid();
 }
 // END: The main function
