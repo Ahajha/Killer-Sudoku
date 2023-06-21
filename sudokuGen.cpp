@@ -33,9 +33,7 @@ int main(int argc, char const *argv[])
   // puzzle->printGrid();
 
   // Printing the grid into SVG file
-  string rem = "sudokuGen";
-  string path = argv[0];
-  path = path.substr(0,path.size() - rem.size());
+  const std::string path = std::filesystem::path(argv[0]).remove_filename();
   puzzle->printSVG(path);
   puzzle->printSVG(path, "images/puzzles_sol.svg", true);
 
