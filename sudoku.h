@@ -1,23 +1,12 @@
 #ifndef SUDOKU_H
 #define SUDOKU_H
 
-#include <iostream>
-#include <algorithm>
-#include <ctime>
-#include <cstdlib>
-#include <fstream>
-#include <sstream>
-#include <string>
 #include <vector>
-#include <numeric>
-#include <bits/stdc++.h>
 
 #include "color.h"
 #include "gate.h"
 
 #define UNASSIGNED 0
-
-using namespace std;
 
 struct Position {
     size_t x, y;
@@ -31,12 +20,12 @@ const size_t maxCageSizeMinus1 = 5; //gridSize - 4;
 
 class Cage {
 public:
-    Cage(vector<Position>& e){
+    Cage(std::vector<Position>& e){
         _cageId = -1;
         _sum = 0;
         _eles = e;
     }
-    Cage(int i, int s, vector<Position>& e){
+    Cage(int i, int s, std::vector<Position> &e) {
         _cageId = i;
         _sum = s;
         _eles = e;
@@ -70,7 +59,7 @@ public:
 private:
     int _cageId;
     int _sum;
-    vector<Position> _eles;
+    std::vector<Position> _eles;
     Gate _g;
 };
 
@@ -79,23 +68,27 @@ private:
   int _grid[gridSize][gridSize];
   int _solnGrid[gridSize][gridSize];
   int _cageId[gridSize][gridSize];
-  vector<Cage> _cages;
+  std::vector<Cage> _cages;
   Gate*** _gates;
 
   static Color _color;
 
   void gateInitial();
   void genProofModel();
-  void subsetSum(vector<int>numbers, const int& s, const int& target, vector<int> partial, vector<vector<int> >& answer);
+  void subsetSum(std::vector<int> numbers, const int &s, const int &target,
+                 std::vector<int> partial,
+                 std::vector<std::vector<int>> &answer);
   SatSolver _solver;
 
 public:
   Sudoku ();
   void createSeed();
   void printGrid();
-  string getGrid();
+  std::string getGrid();
   void genPuzzle();
-  void printSVG(string path="",string svgName="images/puzzle.svg", bool printSol=false);
+  void printSVG(std::string path = "",
+                std::string svgName = "images/puzzle.svg",
+                bool printSol = false);
   bool solveBySAT();
 };
 

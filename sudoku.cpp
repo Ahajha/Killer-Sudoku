@@ -1,14 +1,22 @@
 #include "sudoku.h"
 
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <ios>
+#include <iostream>
+#include <numeric>
+#include <iomanip>
+
 // START: Get grid as string in row major order
-string Sudoku::getGrid()
+std::string Sudoku::getGrid()
 {
-  string s = "";
+  std::string s = "";
   for(int row_num=0; row_num<gridSize; ++row_num)
   {
     for(int col_num=0; col_num<gridSize; ++col_num)
     {
-      s = s + to_string(_grid[row_num][col_num]);
+      s = s + std::to_string(_grid[row_num][col_num]);
     }
   }
 
@@ -58,15 +66,15 @@ void Sudoku::printGrid()
     for(int j=0;j<gridSize;j++)
     {
       if(_grid[i][j] == 0)
-	cout<<".";
+        std::cout << ".";
       else
-	cout<<_grid[i][j];
-      cout<<"|";
+        std::cout << _grid[i][j];
+      std::cout << "|";
     }
-    cout<<endl;
+    std::cout << std::endl;
   }
 
-  cout<<endl;
+  std::cout << std::endl;
 }
 // END: Printing the grid
 
@@ -75,7 +83,7 @@ void Sudoku::genPuzzle()
 {
   size_t sum, sizeOfCage, dir, extPo, currentID, pox, poy;
   int deadLock, gridValue;
-  vector<int> cageAppeared;
+  std::vector<int> cageAppeared;
   for(size_t j=0; j<gridSize; ++j){
       for(size_t i=0; i<gridSize; ++i){
         if(_cageId[i][j] > -1){
@@ -90,8 +98,8 @@ void Sudoku::genPuzzle()
         _cageId[i][j] = currentID;
 
         sum = _grid[i][j];
-        
-        vector<Position> temp;
+
+        std::vector<Position> temp;
 
         temp.push_back({i, j, static_cast<int>(sum)});
         cageAppeared.push_back(sum);
@@ -108,45 +116,49 @@ void Sudoku::genPuzzle()
             case 0:
                 if(pox<8 && _cageId[pox+1][poy] < 0){
                     gridValue = _grid[pox+1][poy];
-                    if(find(cageAppeared.begin(), cageAppeared.end(), gridValue) == cageAppeared.end()){
-                        temp.push_back({pox+1, poy, gridValue});
-                        _cageId[pox+1][poy] = currentID;
-                        cageAppeared.push_back(gridValue);
-                        sum += gridValue;
-                        break;
+                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                                  gridValue) == cageAppeared.end()) {
+                      temp.push_back({pox + 1, poy, gridValue});
+                      _cageId[pox + 1][poy] = currentID;
+                      cageAppeared.push_back(gridValue);
+                      sum += gridValue;
+                      break;
                     }
                 } 
             case 1:
                 if(poy<8 && _cageId[pox][poy+1] < 0){
                     gridValue = _grid[pox][poy+1];
-                    if(find(cageAppeared.begin(), cageAppeared.end(), gridValue) == cageAppeared.end()){
-                        temp.push_back({pox, poy+1, gridValue});
-                        _cageId[pox][poy+1] = currentID;
-                        cageAppeared.push_back(gridValue);
-                        sum += gridValue;
-                        break;
+                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                                  gridValue) == cageAppeared.end()) {
+                      temp.push_back({pox, poy + 1, gridValue});
+                      _cageId[pox][poy + 1] = currentID;
+                      cageAppeared.push_back(gridValue);
+                      sum += gridValue;
+                      break;
                     }
                 }
             case 2:
                 if(pox>1 && _cageId[pox-1][poy] < 0){
                     gridValue = _grid[pox-1][poy];
-                    if(find(cageAppeared.begin(), cageAppeared.end(), gridValue) == cageAppeared.end()){
-                        temp.push_back({pox-1, poy, gridValue});
-                        _cageId[pox-1][poy] = currentID;
-                        cageAppeared.push_back(gridValue);
-                        sum += gridValue;
-                        break;
+                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                                  gridValue) == cageAppeared.end()) {
+                      temp.push_back({pox - 1, poy, gridValue});
+                      _cageId[pox - 1][poy] = currentID;
+                      cageAppeared.push_back(gridValue);
+                      sum += gridValue;
+                      break;
                     }
                 }
             case 3:
                 if(poy>1 && _cageId[pox][poy-1] < 0 ){
                     gridValue = _grid[pox][poy-1];
-                    if(find(cageAppeared.begin(), cageAppeared.end(), gridValue) == cageAppeared.end()){
-                        temp.push_back({pox, poy-1, gridValue});
-                        _cageId[pox][poy-1] = currentID;
-                        cageAppeared.push_back(gridValue);
-                        sum += gridValue;
-                        break;
+                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                                  gridValue) == cageAppeared.end()) {
+                      temp.push_back({pox, poy - 1, gridValue});
+                      _cageId[pox][poy - 1] = currentID;
+                      cageAppeared.push_back(gridValue);
+                      sum += gridValue;
+                      break;
                     }
                 }          
             default:
@@ -171,7 +183,7 @@ void Sudoku::genPuzzle()
             }
         }
 
-        sort(temp.begin(), temp.end(), sortGrid);
+        std::sort(temp.begin(), temp.end(), sortGrid);
         _cages.push_back(Cage(currentID, sum, temp));
       } 
   }
@@ -180,21 +192,20 @@ void Sudoku::genPuzzle()
 
 
 // START: Printing into SVG file
-void Sudoku::printSVG(string path,string svgName, bool printSol)
-{
-  string fileName = path + "svgHead.txt";
-  ifstream file1(fileName.c_str());
-  stringstream svgHead;
+void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
+  std::string fileName = path + "svgHead.txt";
+  std::ifstream file1(fileName.c_str());
+  std::stringstream svgHead;
   svgHead << file1.rdbuf();
 
-  ofstream outFile(svgName);
+  std::ofstream outFile(svgName);
   outFile << svgHead.rdbuf();
 
   file1.close();
 
   int width = 50 * (gridSize+2);
 
-  stringstream head;
+  std::stringstream head;
   head << width << "\" height=\"" << width << "\">\n" ;
   outFile << head.rdbuf();
 
@@ -207,7 +218,7 @@ void Sudoku::printSVG(string path,string svgName, bool printSol)
         int x = 50*j;
         int y = 50*i;
 
-        stringstream text;
+        std::stringstream text;
         text << "<rect x=\""<<x<<"\" y=\""<<y<<"\" width=\"50\" height=\"50\" style=\"fill:" << _color[_cageId[i][j]] <<";opacity:"<< _color.opacity(_cageId[i][j]) << "\"/>\n";
         if(printSol){
             text<<"<text x=\""<<x+16<<"\" y=\""<<y+35<<"\" style=\"font-weight:bold\" font-size=\"30px\">"<<_grid[i][j]<<"</text>\n";
@@ -221,13 +232,13 @@ void Sudoku::printSVG(string path,string svgName, bool printSol)
       int x = 50* it->getPoy(0) + 8;
       int y = 50* it->getPox(0) + 18;
 
-      stringstream text;
+      std::stringstream text;
       text<<"<text x=\""<<x<<"\" y=\""<<y<<"\" style=\"font-weight:bold\" fill=\"red\" font-size=\"15px\">"<<it->getSum()<<"</text>\n";
       outFile << text.rdbuf();
   }
 
   for(int i=0; i<=gridSize; ++i){
-      stringstream text, text2;
+      std::stringstream text, text2;
       text<<  "<polyline points=\"" << 50*i << ",0 " << 50*i << "," << width-100 << "\" style=\"fill:none; stroke:black ; stroke-width:";
       text2<<  "<polyline points=\"0," << 50*i << " " << width-100 << "," << 50*i<< "\" style=\"fill:none; stroke:black ; stroke-width:";
       if(i%boxSize == 0){
@@ -248,7 +259,6 @@ void Sudoku::printSVG(string path,string svgName, bool printSol)
   outFile << "</svg>";
 
   outFile.close();
-
 }
 // END: Printing into SVG file
 
@@ -365,8 +375,8 @@ void Sudoku::genProofModel(){
         }
     }
 
-    vector<int> numbers;
-    vector<int> partial;
+    std::vector<int> numbers;
+    std::vector<int> partial;
 
     for(int i=1; i<=gridSize; ++i){
         numbers.push_back(i);
@@ -387,7 +397,7 @@ void Sudoku::genProofModel(){
 
          size_t cs = it->getCageSize();
          int sum = it->getSum();
-         vector<vector<int> > answers;
+         std::vector<std::vector<int>> answers;
          subsetSum(numbers, cs, sum, partial, answers);
          vec<Lit> validSols;
          for(auto ans=answers.begin(); ans!=answers.end(); ++ans){
@@ -417,9 +427,9 @@ bool Sudoku::solveBySAT(){
     end = clock();
 
     double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
-    cout << "Time taken by genProofModel() is : " << fixed 
-         << time_taken << setprecision(5);
-    cout << " sec " << endl;
+    std::cout << "Time taken by genProofModel() is : " << std::fixed
+              << time_taken << std::setprecision(5);
+    std::cout << " sec " << std::endl;
 
     bool result;
     // k = Solve(Gate(5) ^ !Gate(8))
@@ -436,11 +446,11 @@ bool Sudoku::solveBySAT(){
     result = _solver.assumpSolve();
     end = clock();
     time_taken = double(end - start) / double(CLOCKS_PER_SEC);
-    cout << "Time taken by solver.assumpSolve() is : " << fixed 
-         << time_taken << setprecision(5);
-    cout << " sec " << endl;
+    std::cout << "Time taken by solver.assumpSolve() is : " << std::fixed
+              << time_taken << std::setprecision(5);
+    std::cout << " sec " << std::endl;
     _solver.printStats();
-    cout << (result? "SAT" : "UNSAT") << endl;
+    std::cout << (result ? "SAT" : "UNSAT") << std::endl;
     if (result) {
         for (size_t i = 0, n=gridSize; i < n; ++i)
         {
@@ -471,9 +481,10 @@ bool Sudoku::solveBySAT(){
     delete [] _gates;
 }
 
-void Sudoku::subsetSum(vector<int>numbers, const int&s,  const int& target, vector<int> partial, vector<vector<int> >& answer)
-{
-    int sum = accumulate(partial.begin(), partial.end(), 0);
+void Sudoku::subsetSum(std::vector<int> numbers, const int &s,
+                       const int &target, std::vector<int> partial,
+                       std::vector<std::vector<int>> &answer) {
+    int sum = std::accumulate(partial.begin(), partial.end(), 0);
 
     if(sum == target){
         answer.push_back(partial);
@@ -485,7 +496,7 @@ void Sudoku::subsetSum(vector<int>numbers, const int&s,  const int& target, vect
 
     for(auto it=numbers.begin(); it!=numbers.end(); ++it){
         partial.push_back(*it);
-        vector<int> remainig(it+1, numbers.end());
+        std::vector<int> remainig(it + 1, numbers.end());
         subsetSum(remainig, s, target, partial, answer);
         partial.pop_back();
     }

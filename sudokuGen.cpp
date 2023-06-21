@@ -1,15 +1,8 @@
 #include <iostream>
-#include <algorithm>
-#include <ctime>
-#include <cstdlib>
-#include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
+#include <filesystem>
 
 #include "sudoku.h"
-
-using namespace std;
 
 // START: The main function
 int main(int argc, char const *argv[])
@@ -18,9 +11,9 @@ int main(int argc, char const *argv[])
   srand(time(NULL));
 
   // Creating an instance of Sudoku
-  cout << "======================================" <<endl;
-  cout << "random generating puzzle by SAT...." <<endl;
-  cout << "======================================" <<endl;
+  std::cout << "======================================" << std::endl;
+  std::cout << "random generating puzzle by SAT...." << std::endl;
+  std::cout << "======================================" << std::endl;
   Sudoku *puzzle = new Sudoku();
 
   // Creating a seed for puzzle generation
@@ -37,9 +30,9 @@ int main(int argc, char const *argv[])
   puzzle->printSVG(path);
   puzzle->printSVG(path, "images/puzzles_sol.svg", true);
 
-  cout << "======================================" <<endl;
-  cout << "trying to solve puzzle by SAT...." <<endl;
-  cout << "======================================" <<endl;
+  std::cout << "======================================" << std::endl;
+  std::cout << "trying to solve puzzle by SAT...." << std::endl;
+  std::cout << "======================================" << std::endl;
 
   puzzle->solveBySAT();
   puzzle->printSVG(path, "images/puzzles_solbySAT.svg", true);

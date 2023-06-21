@@ -2,12 +2,11 @@
 #define COLOR_H
 
 #include <string>
-using namespace std;
 
 class Color
 {
 private:    
-    string _colorList[12];
+    std::string _colorList[12];
 public:
     Color(){
         _colorList[0] = "LightCoral";
@@ -25,7 +24,7 @@ public:
     }
     ~Color(){}
 
-    string operator [] (int n) const { return _colorList[n%12]; }
+    std::string operator [] (int n) const { return _colorList[n%12]; }
     float opacity (int n) const { return (n/12)%2?0.3:1.0; }
 };
 

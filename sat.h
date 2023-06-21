@@ -9,11 +9,7 @@
 #ifndef SAT_H
 #define SAT_H
 
-#include <cassert>
-#include <iostream>
 #include "Solver.h"
-
-using namespace std;
 
 /********** MiniSAT_Solver **********/
 class SatSolver
