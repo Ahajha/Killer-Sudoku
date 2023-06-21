@@ -12,10 +12,9 @@
 std::string Sudoku::getGrid()
 {
   std::string s = "";
-  for(int row_num=0; row_num<gridSize; ++row_num)
+  for(std::size_t row_num=0; row_num<gridSize; ++row_num)
   {
-    for(int col_num=0; col_num<gridSize; ++col_num)
-    {
+    for (std::size_t col_num = 0; col_num < gridSize; ++col_num) {
       s = s + std::to_string(_grid[row_num][col_num]);
     }
   }
@@ -30,10 +29,8 @@ void Sudoku::createSeed()
   this->solveBySAT();
   
   // Saving the solution grid
-  for(int i=0;i<gridSize;i++)
-  {
-    for(int j=0;j<gridSize;j++)
-    {
+  for (std::size_t i = 0; i < gridSize; i++) {
+    for (std::size_t j = 0; j < gridSize; j++) {
       _solnGrid[i][j] = _grid[i][j];
     }
   }
@@ -45,15 +42,12 @@ void Sudoku::createSeed()
 Sudoku::Sudoku()
 {
   // Initialising the grid
-  for(int i=0;i<gridSize;i++)
-  {
-    for(int j=0;j<gridSize;j++)
-    {
+  for (std::size_t i = 0; i < gridSize; i++) {
+    for (std::size_t j = 0; j < gridSize; j++) {
       _grid[i][j]=0;
       _cageId[i][j] = -1;
     }
   }
-
 }
 // END: Initialising
 
@@ -61,10 +55,8 @@ Sudoku::Sudoku()
 // START: Printing the grid
 void Sudoku::printGrid()
 {
-  for(int i=0;i<gridSize;i++)
-  {
-    for(int j=0;j<gridSize;j++)
-    {
+  for (std::size_t i = 0; i < gridSize; i++) {
+    for (std::size_t j = 0; j < gridSize; j++) {
       if(_grid[i][j] == 0)
         std::cout << ".";
       else
@@ -84,108 +76,105 @@ void Sudoku::genPuzzle()
   size_t sum, sizeOfCage, dir, extPo, currentID, pox, poy;
   int deadLock, gridValue;
   std::vector<int> cageAppeared;
-  for(size_t j=0; j<gridSize; ++j){
-      for(size_t i=0; i<gridSize; ++i){
-        if(_cageId[i][j] > -1){
+  for (std::size_t j = 0; j < gridSize; ++j) {
+    for (std::size_t i = 0; i < gridSize; ++i) {
+      if (_cageId[i][j] > -1) {
+        continue;
+      }
+
+      deadLock = 0;
+      cageAppeared.clear();
+      sizeOfCage = rand() % maxCageSizeMinus1 + 2;
+      currentID = _cages.size();
+
+      _cageId[i][j] = currentID;
+
+      sum = _grid[i][j];
+
+      std::vector<Position> temp;
+
+      temp.push_back({i, j, static_cast<int>(sum)});
+      cageAppeared.push_back(sum);
+
+      while (temp.size() < sizeOfCage && deadLock < 1) {
+        extPo = rand() % temp.size();
+        pox = temp[extPo].x;
+        poy = temp[extPo].y;
+
+        dir = rand() % 2;
+        switch (dir) {
+        case 0:
+          if (pox < 8 && _cageId[pox + 1][poy] < 0) {
+            gridValue = _grid[pox + 1][poy];
+            if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                          gridValue) == cageAppeared.end()) {
+              temp.push_back({pox + 1, poy, gridValue});
+              _cageId[pox + 1][poy] = currentID;
+              cageAppeared.push_back(gridValue);
+              sum += gridValue;
+              break;
+            }
+          }
+        case 1:
+          if (poy < 8 && _cageId[pox][poy + 1] < 0) {
+            gridValue = _grid[pox][poy + 1];
+            if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                          gridValue) == cageAppeared.end()) {
+              temp.push_back({pox, poy + 1, gridValue});
+              _cageId[pox][poy + 1] = currentID;
+              cageAppeared.push_back(gridValue);
+              sum += gridValue;
+              break;
+            }
+          }
+        case 2:
+          if (pox > 1 && _cageId[pox - 1][poy] < 0) {
+            gridValue = _grid[pox - 1][poy];
+            if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                          gridValue) == cageAppeared.end()) {
+              temp.push_back({pox - 1, poy, gridValue});
+              _cageId[pox - 1][poy] = currentID;
+              cageAppeared.push_back(gridValue);
+              sum += gridValue;
+              break;
+            }
+          }
+        case 3:
+          if (poy > 1 && _cageId[pox][poy - 1] < 0) {
+            gridValue = _grid[pox][poy - 1];
+            if (std::find(cageAppeared.begin(), cageAppeared.end(),
+                          gridValue) == cageAppeared.end()) {
+              temp.push_back({pox, poy - 1, gridValue});
+              _cageId[pox][poy - 1] = currentID;
+              cageAppeared.push_back(gridValue);
+              sum += gridValue;
+              break;
+            }
+          }
+        default:
+          ++deadLock;
+          break;
+        }
+      }
+
+      if (temp.size() == 1) {
+        switch (dir) {
+        case 0:
+          if (i > 1 && _cages[_cageId[i - 1][j]].addEle(temp[0], sum)) {
+            _cageId[i][j] = _cageId[i - 1][j];
             continue;
+          }
+        default:
+          if (j > 1 && _cages[_cageId[i][j - 1]].addEle(temp[0], sum)) {
+            _cageId[i][j] = _cageId[i][j - 1];
+            continue;
+          }
         }
+      }
 
-        deadLock = 0;
-        cageAppeared.clear();
-        sizeOfCage = rand()%maxCageSizeMinus1 + 2;
-        currentID = _cages.size();
-
-        _cageId[i][j] = currentID;
-
-        sum = _grid[i][j];
-
-        std::vector<Position> temp;
-
-        temp.push_back({i, j, static_cast<int>(sum)});
-        cageAppeared.push_back(sum);
-
-        while (temp.size() < sizeOfCage && deadLock < 1)
-        {      
-            extPo = rand()%temp.size();  
-            pox = temp[extPo].x;
-            poy = temp[extPo].y;    
-
-            dir = rand()%2;
-            switch (dir)
-            {
-            case 0:
-                if(pox<8 && _cageId[pox+1][poy] < 0){
-                    gridValue = _grid[pox+1][poy];
-                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
-                                  gridValue) == cageAppeared.end()) {
-                      temp.push_back({pox + 1, poy, gridValue});
-                      _cageId[pox + 1][poy] = currentID;
-                      cageAppeared.push_back(gridValue);
-                      sum += gridValue;
-                      break;
-                    }
-                } 
-            case 1:
-                if(poy<8 && _cageId[pox][poy+1] < 0){
-                    gridValue = _grid[pox][poy+1];
-                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
-                                  gridValue) == cageAppeared.end()) {
-                      temp.push_back({pox, poy + 1, gridValue});
-                      _cageId[pox][poy + 1] = currentID;
-                      cageAppeared.push_back(gridValue);
-                      sum += gridValue;
-                      break;
-                    }
-                }
-            case 2:
-                if(pox>1 && _cageId[pox-1][poy] < 0){
-                    gridValue = _grid[pox-1][poy];
-                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
-                                  gridValue) == cageAppeared.end()) {
-                      temp.push_back({pox - 1, poy, gridValue});
-                      _cageId[pox - 1][poy] = currentID;
-                      cageAppeared.push_back(gridValue);
-                      sum += gridValue;
-                      break;
-                    }
-                }
-            case 3:
-                if(poy>1 && _cageId[pox][poy-1] < 0 ){
-                    gridValue = _grid[pox][poy-1];
-                    if (std::find(cageAppeared.begin(), cageAppeared.end(),
-                                  gridValue) == cageAppeared.end()) {
-                      temp.push_back({pox, poy - 1, gridValue});
-                      _cageId[pox][poy - 1] = currentID;
-                      cageAppeared.push_back(gridValue);
-                      sum += gridValue;
-                      break;
-                    }
-                }          
-            default:
-                ++deadLock;
-                break;
-            }
-        }
-
-        if(temp.size() == 1){
-            switch (dir)
-            {
-            case 0:
-                if(i>1 && _cages[_cageId[i-1][j]].addEle(temp[0], sum)){
-                    _cageId[i][j] = _cageId[i-1][j];
-                    continue;
-                }            
-            default:
-                if(j>1 && _cages[_cageId[i][j-1]].addEle(temp[0], sum)){
-                    _cageId[i][j] = _cageId[i][j-1];
-                    continue;
-                }
-            }
-        }
-
-        std::sort(temp.begin(), temp.end(), sortGrid);
-        _cages.push_back(Cage(currentID, sum, temp));
-      } 
+      std::sort(temp.begin(), temp.end(), sortGrid);
+      _cages.push_back(Cage(currentID, sum, temp));
+    }
   }
 }
 // END: Generate puzzle
@@ -209,10 +198,8 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
   head << width << "\" height=\"" << width << "\">\n" ;
   outFile << head.rdbuf();
 
-  for(int j=0;j<gridSize;j++)
-  {
-    for(int i=0;i<gridSize;i++)
-    {
+  for (std::size_t j = 0; j < gridSize; j++) {
+    for (std::size_t i = 0; i < gridSize; i++) {
       if(this->_grid[i][j]!=0)
       {
         int x = 50*j;
@@ -225,7 +212,7 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
         }
         outFile << text.rdbuf();
       }
-    }    
+    }
   }
 
   for(auto it=_cages.begin(); it!=_cages.end(); ++it){
@@ -237,7 +224,7 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
       outFile << text.rdbuf();
   }
 
-  for(int i=0; i<=gridSize; ++i){
+  for (std::size_t i = 0; i <= gridSize; ++i) {
       std::stringstream text, text2;
       text<<  "<polyline points=\"" << 50*i << ",0 " << 50*i << "," << width-100 << "\" style=\"fill:none; stroke:black ; stroke-width:";
       text2<<  "<polyline points=\"0," << 50*i << " " << width-100 << "," << 50*i<< "\" style=\"fill:none; stroke:black ; stroke-width:";
@@ -274,18 +261,17 @@ void Sudoku::gateInitial(){
     _solver.initialize();
     _gates = new Gate**[gridSize];
 
-    for(int i=0; i<gridSize; ++i){
-        _gates[i] = new Gate*[gridSize]; 
-        for(int j=0; j<gridSize; ++j){
-            _gates[i][j] = new Gate[gridSize];
-            for(int k=0; k<gridSize; ++k){
-                Var v = _solver.newVar();
-                _gates[i][j][k].setVar(v);
-            }
-        }
+    for (std::size_t i = 0; i < gridSize; ++i) {
+      _gates[i] = new Gate *[gridSize];
+      for (std::size_t j = 0; j < gridSize; ++j) {
+          _gates[i][j] = new Gate[gridSize];
+          for (std::size_t k = 0; k < gridSize; ++k) {
+        Var v = _solver.newVar();
+        _gates[i][j][k].setVar(v);
+          }
+      }
     }
-    
-    
+
     for(size_t s = _cages.size(), i=0; i<s; ++i){
         _cages[i].setGate(_solver);
     }
@@ -294,91 +280,103 @@ void Sudoku::gateInitial(){
 void Sudoku::genProofModel(){
     vec<Lit> lits;
     // entry condition
-    for(int j=0; j<gridSize; ++j){
-        for(int i=0; i<gridSize; ++i){
-            for(int k=0; k<gridSize; ++k){
-                lits.push(Lit(_gates[i][j][k].getVar()));
-            }
-            _solver.addCNF(lits); lits.clear();
+    for (std::size_t j = 0; j < gridSize; ++j) {
+        for (std::size_t i = 0; i < gridSize; ++i) {
+          for (std::size_t k = 0; k < gridSize; ++k) {
+        lits.push(Lit(_gates[i][j][k].getVar()));
+          }
+          _solver.addCNF(lits);
+          lits.clear();
         }
     }
-    for(int j=0; j<gridSize; ++j){
-        for(int i=0; i<gridSize; ++i){
-            for(int k=0; k<gridSize-1; ++k){
-                for(int z=k+1; z<gridSize; ++z){
-                    lits.push(~Lit(_gates[i][j][k].getVar()));
-                    lits.push(~Lit(_gates[i][j][z].getVar()));
-                    _solver.addCNF(lits); lits.clear();
-                }                
+    for (std::size_t j = 0; j < gridSize; ++j) {
+        for (std::size_t i = 0; i < gridSize; ++i) {
+          for (std::size_t k = 0; k < gridSize - 1; ++k) {
+            for (std::size_t z = k + 1; z < gridSize; ++z) {
+                lits.push(~Lit(_gates[i][j][k].getVar()));
+                lits.push(~Lit(_gates[i][j][z].getVar()));
+                _solver.addCNF(lits);
+                lits.clear();
             }
+          }
         }
     }
 
-    // row 
-    for(int j=0; j<gridSize; ++j){
-        for(int k=0; k<gridSize; ++k){
-            for(int i=0; i<gridSize-1; ++i){
-                for(int q=i+1; q<gridSize; ++q){
-                    lits.push(~Lit(_gates[i][j][k].getVar()));
-                    lits.push(~Lit(_gates[q][j][k].getVar()));
-                    _solver.addCNF(lits); lits.clear();
-                }
+    // row
+    for (std::size_t j = 0; j < gridSize; ++j) {
+        for (std::size_t k = 0; k < gridSize; ++k) {
+          for (std::size_t i = 0; i < gridSize - 1; ++i) {
+            for (std::size_t q = i + 1; q < gridSize; ++q) {
+                lits.push(~Lit(_gates[i][j][k].getVar()));
+                lits.push(~Lit(_gates[q][j][k].getVar()));
+                _solver.addCNF(lits);
+                lits.clear();
             }
+          }
         }
     }
 
     // column
-    for(int i=0; i<gridSize; ++i){
-        for(int k=0; k<gridSize; ++k){
-            for(int j=0; j<gridSize-1; ++j){
-                for(int q=j+1; q<gridSize; ++q){
-                    lits.push(~Lit(_gates[i][j][k].getVar()));
-                    lits.push(~Lit(_gates[i][q][k].getVar()));
-                    _solver.addCNF(lits); lits.clear();
-                }
+    for (std::size_t i = 0; i < gridSize; ++i) {
+        for (std::size_t k = 0; k < gridSize; ++k) {
+          for (std::size_t j = 0; j < gridSize - 1; ++j) {
+            for (std::size_t q = j + 1; q < gridSize; ++q) {
+                lits.push(~Lit(_gates[i][j][k].getVar()));
+                lits.push(~Lit(_gates[i][q][k].getVar()));
+                _solver.addCNF(lits);
+                lits.clear();
             }
+          }
         }
     }
 
     // box
-    for(int k=0; k<gridSize; ++k){
-        for(int q=0; q<boxSize; ++q){
-            for(int r=0; r<boxSize; ++r){
-                for(int i=0; i<boxSize; ++i){
-                    for(int j=0; j<boxSize; ++j){
-                        for(int s=j+1; s<boxSize; ++s){
-                            lits.push(~Lit(_gates[boxSize*q+i][boxSize*r+j][k].getVar()));
-                            lits.push(~Lit(_gates[boxSize*q+i][boxSize*r+s][k].getVar()));
-                            _solver.addCNF(lits); lits.clear();
-                        }
+    for (std::size_t k = 0; k < gridSize; ++k) {
+        for (std::size_t q = 0; q < boxSize; ++q) {
+          for (std::size_t r = 0; r < boxSize; ++r) {
+            for (std::size_t i = 0; i < boxSize; ++i) {
+                for (std::size_t j = 0; j < boxSize; ++j) {
+                    for (std::size_t s = j + 1; s < boxSize; ++s) {
+                      lits.push(
+                          ~Lit(_gates[boxSize * q + i][boxSize * r + j][k].getVar()));
+                      lits.push(
+                          ~Lit(_gates[boxSize * q + i][boxSize * r + s][k].getVar()));
+                      _solver.addCNF(lits);
+                      lits.clear();
                     }
                 }
             }
+          }
         }
     }
 
-    for(int k=0; k<gridSize; ++k){
-        for(int q=0; q<boxSize; ++q){
-            for(int r=0; r<boxSize; ++r){
-                for(int i=0; i<boxSize; ++i){
-                    for(int j=0; j<boxSize; ++j){
-                        for(int s=i+1; s<boxSize; ++s){
-                            for(int t=0; t<boxSize; ++t){
-                                lits.push(~Lit(_gates[boxSize*q+i][boxSize*r+j][k].getVar()));
-                                lits.push(~Lit(_gates[boxSize*q+s][boxSize*r+t][k].getVar()));
-                                _solver.addCNF(lits); lits.clear();
-                            }
-                        }
+    for (std::size_t k = 0; k < gridSize; ++k) {
+        for (std::size_t q = 0; q < boxSize; ++q) {
+          for (std::size_t r = 0; r < boxSize; ++r) {
+            for (std::size_t i = 0; i < boxSize; ++i) {
+                for (std::size_t j = 0; j < boxSize; ++j) {
+                    for (std::size_t s = i + 1; s < boxSize; ++s) {
+                      for (std::size_t t = 0; t < boxSize; ++t) {
+                        lits.push(
+                            ~Lit(_gates[boxSize * q + i][boxSize * r + j][k]
+                                     .getVar()));
+                        lits.push(
+                            ~Lit(_gates[boxSize * q + s][boxSize * r + t][k]
+                                     .getVar()));
+                        _solver.addCNF(lits);
+                        lits.clear();
+                      }
                     }
                 }
             }
+          }
         }
     }
 
     std::vector<int> numbers;
     std::vector<int> partial;
 
-    for(int i=1; i<=gridSize; ++i){
+    for (std::size_t i = 1; i <= gridSize; ++i) {
         numbers.push_back(i);
     }
 
@@ -418,7 +416,7 @@ void Sudoku::genProofModel(){
 
 }
 
-bool Sudoku::solveBySAT(){
+void Sudoku::solveBySAT(){
     gateInitial();
 
     clock_t start, end;
@@ -438,8 +436,8 @@ bool Sudoku::solveBySAT(){
     _solver.assumeRelease();  // Clear assumptions
 
     // letting all sum condition be true
-    for(size_t i=0, s=_cages.size(); i<s; ++i){
-        _solver.assumeProperty(_cages[i].getGate().getVar(), true);
+    for (std::size_t i = 0, s = _cages.size(); i < s; ++i) {
+         _solver.assumeProperty(_cages[i].getGate().getVar(), true);
     }
     // solver.assumeProperty(newV, true);  // k = 1
     start = clock();
@@ -452,31 +450,30 @@ bool Sudoku::solveBySAT(){
     _solver.printStats();
     std::cout << (result ? "SAT" : "UNSAT") << std::endl;
     if (result) {
-        for (size_t i = 0, n=gridSize; i < n; ++i)
-        {
-            for(size_t j=0; j<gridSize; ++j){
-                for(size_t k=0; k<gridSize; ++k){
+         for (std::size_t i = 0, n = gridSize; i < n; ++i) {
+             for (std::size_t j = 0; j < gridSize; ++j) {
+                 for (std::size_t k = 0; k < gridSize; ++k) {
                     if(_solver.getValue(_gates[i][j][k].getVar())){
                         _grid[i][j] = k+1;
                         break;
                     }
-                }
-            }
-        }
+                 }
+             }
+         }
     }
     else{
-        for(size_t j=0; j<gridSize; ++j){
-            for(size_t i=0; i<gridSize; ++i){
-                    _grid[i][j] = 0;
-            }
-        }
+         for (std::size_t j = 0; j < gridSize; ++j) {
+             for (std::size_t i = 0; i < gridSize; ++i) {
+                 _grid[i][j] = 0;
+             }
+         }
     }
 
-    for(int i=0; i<gridSize; ++i){
-        for(int j=0; j<gridSize; ++j){
-            delete [] _gates[i][j];
-        }
-        delete [] _gates[i];
+    for (std::size_t i = 0; i < gridSize; ++i) {
+         for (std::size_t j = 0; j < gridSize; ++j) {
+             delete[] _gates[i][j];
+         }
+         delete[] _gates[i];
     }
     delete [] _gates;
 }

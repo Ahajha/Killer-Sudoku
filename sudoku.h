@@ -89,7 +89,7 @@ public:
   void printSVG(std::string path = "",
                 std::string svgName = "images/puzzle.svg",
                 bool printSol = false);
-  bool solveBySAT();
+  void solveBySAT();
 };
 
 #endif
