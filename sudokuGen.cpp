@@ -14,33 +14,30 @@ int main([[maybe_unused]] int argc, char const *argv[])
   std::cout << "======================================" << std::endl;
   std::cout << "random generating puzzle by SAT...." << std::endl;
   std::cout << "======================================" << std::endl;
-  Sudoku *puzzle = new Sudoku();
+  Sudoku puzzle;
 
   // Creating a seed for puzzle generation
-  puzzle->createSeed();
+  puzzle.createSeed();
 
   // Generating the puzzle cage
-  puzzle->genPuzzle();
+  puzzle.genPuzzle();
 
   // testing by printing the grid
   // puzzle->printGrid();
 
   // Printing the grid into SVG file
   const std::string path = std::filesystem::path(argv[0]).remove_filename();
-  puzzle->printSVG(path);
-  puzzle->printSVG(path, "images/puzzles_sol.svg", true);
+  puzzle.printSVG(path);
+  puzzle.printSVG(path, "images/puzzles_sol.svg", true);
 
   std::cout << "======================================" << std::endl;
   std::cout << "trying to solve puzzle by SAT...." << std::endl;
   std::cout << "======================================" << std::endl;
 
-  puzzle->solveBySAT();
-  puzzle->printSVG(path, "images/puzzles_solbySAT.svg", true);
+  puzzle.solveBySAT();
+  puzzle.printSVG(path, "images/puzzles_solbySAT.svg", true);
   // cout<<"The above sudoku puzzle has been stored in puzzles.svg in current folder\n";
   // freeing the memory
   // puzzle->printGrid();
-  delete puzzle;
-
-  return 0;
 }
 // END: The main function
