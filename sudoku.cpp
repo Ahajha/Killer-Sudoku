@@ -261,10 +261,36 @@ void Sudoku::gateInitial(SatSolver& solver, Gates& gates){
 }
 
 void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
+    // Ahajha:
+    // From my basic initial understanding, my guess is that each
+    // solver variable represents "Can this cell be this value",
+    // which gives an initial set of gridSize * gridSize * gridSize variables.
+    // These are stored in `gates`.
     vec<Lit> lits;
+
     // entry condition
+
+    // Together, these two conditions ensure that each cell has exactly one
+    // value. For a grid size of 9, and representing "can this cell be N" as
+    // "LN", for a single cell we have:
+    //
+    // (L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8 | L9) &
+    // (~L1 | ~L2) & (~L1 | ~L3) & (~L1 | ~L4) & (~L1 | ~L5) & (~L1 | ~L6) &
+    // (~L1 | ~L7) & (~L1 | ~L8) & (~L1 | ~L9) &
+    // (~L2 | ~L3) & (~L2 | ~L4) & (~L2 | ~L5) & (~L2 | ~L6) & (~L2 | ~L7) &
+    // (~L2 | ~L8) & (~L2 | ~L9) &
+    // (~L3 | ~L4) & (~L3 | ~L5) & (~L3 | ~L6) & (~L3 | ~L7) & (~L3 | ~L8) &
+    // (~L3 | ~L9) &
+    // (~L4 | ~L5) & (~L4 | ~L6) & (~L4 | ~L7) & (~L4 | ~L8) & (~L4 | ~L9) &
+    // (~L5 | ~L6) & (~L5 | ~L7) & (~L5 | ~L8) & (~L5 | ~L9) &
+    // (~L6 | ~L7) & (~L6 | ~L8) & (~L6 | ~L9) &
+    // (~L7 | ~L8) & (~L7 | ~L59) &
+    // (~L8 | ~L9)
+    // (Could this be simplified? Probably some interesting research around
+    // minimal XOR of N variables)
     for (std::size_t j = 0; j < gridSize; ++j) {
         for (std::size_t i = 0; i < gridSize; ++i) {
+            // Each cell has gridSize gates, at least one of which must be true
           for (std::size_t k = 0; k < gridSize; ++k) {
             lits.push(Lit(gates[i][j][k]));
           }
@@ -274,6 +300,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     }
     for (std::size_t j = 0; j < gridSize; ++j) {
         for (std::size_t i = 0; i < gridSize; ++i) {
+            // Each cell has gridSize gates, no two of which can be true
           for (std::size_t k = 0; k < gridSize - 1; ++k) {
             for (std::size_t z = k + 1; z < gridSize; ++z) {
                 lits.push(~Lit(gates[i][j][k]));
@@ -288,6 +315,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     // row
     for (std::size_t j = 0; j < gridSize; ++j) {
         for (std::size_t k = 0; k < gridSize; ++k) {
+            // Each cell in a row must have a different value than every other 
           for (std::size_t i = 0; i < gridSize - 1; ++i) {
             for (std::size_t q = i + 1; q < gridSize; ++q) {
                 lits.push(~Lit(gates[i][j][k]));
@@ -302,6 +330,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     // column
     for (std::size_t i = 0; i < gridSize; ++i) {
         for (std::size_t k = 0; k < gridSize; ++k) {
+            // Each cell in a column must have a different value than every other
           for (std::size_t j = 0; j < gridSize - 1; ++j) {
             for (std::size_t q = j + 1; q < gridSize; ++q) {
                 lits.push(~Lit(gates[i][j][k]));
@@ -316,6 +345,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     // box
     for (std::size_t k = 0; k < gridSize; ++k) {
         for (std::size_t q = 0; q < boxSize; ++q) {
+          // Each cell in a box must have a different value than every other
           for (std::size_t r = 0; r < boxSize; ++r) {
             for (std::size_t i = 0; i < boxSize; ++i) {
                 for (std::size_t j = 0; j < boxSize; ++j) {
@@ -333,6 +363,7 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
         }
     }
 
+    // Not immediately certain what the purpose of this one is, maybe one is for rows, one for columns?
     for (std::size_t k = 0; k < gridSize; ++k) {
         for (std::size_t q = 0; q < boxSize; ++q) {
           for (std::size_t r = 0; r < boxSize; ++r) {
