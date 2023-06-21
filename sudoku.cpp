@@ -93,7 +93,7 @@ void Sudoku::genPuzzle()
         
         vector<Position> temp;
 
-        temp.push_back({i, j, sum});
+        temp.push_back({i, j, static_cast<int>(sum)});
         cageAppeared.push_back(sum);
 
         while (temp.size() < sizeOfCage && deadLock < 1)
