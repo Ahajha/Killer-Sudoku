@@ -40,3 +40,7 @@
 sudokuGen
 .depend.mak
 *.log
+
+.cache
+build
+sudoku_gen
