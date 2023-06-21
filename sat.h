@@ -9,14 +9,15 @@
 #ifndef SAT_H
 #define SAT_H
 
+#include <memory>
+
 #include "Solver.h"
 
 /********** MiniSAT_Solver **********/
 class SatSolver
 {
    public : 
-      SatSolver():_solver(0) { }
-      ~SatSolver() { if (_solver) delete _solver; }
+      SatSolver() {}
 
       // Solver initialization and reset
       void initialize() {
@@ -24,8 +25,7 @@ class SatSolver
          if (_curVar == 0) { _solver->newVar(); ++_curVar; }
       }
       void reset() {
-         if (_solver) delete _solver;
-         _solver = new Solver();
+         _solver = std::make_unique<Solver>();
          _assump.clear(); _curVar = 0;
       }
 
@@ -104,10 +104,10 @@ class SatSolver
       int getValue(Var v) const {
          return (_solver->modelValue(v)==l_True?1:
                 (_solver->modelValue(v)==l_False?0:-1)); }
-      void printStats() const { const_cast<Solver*>(_solver)->printStats(); }
+      void printStats() const { const_cast<Solver*>(_solver.get())->printStats(); }
 
    private : 
-      Solver           *_solver;    // Pointer to a Minisat solver
+      std::unique_ptr<Solver>_solver;    // Pointer to a Minisat solver
       Var               _curVar;    // Variable currently
       vec<Lit>          _assump;    // Assumption List for assumption solve
 };
