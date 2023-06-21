@@ -15,7 +15,6 @@ add_library(minisat STATIC)
 target_sources(minisat PRIVATE
     "${minisat_SOURCE_DIR}/Solver.C"
 )
-target_compile_features(minisat PRIVATE cxx_std_14)
 target_include_directories(minisat PUBLIC "${minisat_SOURCE_DIR}")
 
 add_executable(sudoku_gen)
