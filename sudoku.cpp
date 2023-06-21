@@ -266,6 +266,9 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     // solver variable represents "Can this cell be this value",
     // which gives an initial set of gridSize * gridSize * gridSize variables.
     // These are stored in `gates`.
+
+    // Throughout, the variable names 'row', 'col', and 'num' refer to row
+    // indexes, column indexes, and possible value for a cell (minus one).
     vec<Lit> lits;
 
     // entry condition
@@ -288,23 +291,23 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     // (~L8 | ~L9)
     // (Could this be simplified? Probably some interesting research around
     // minimal XOR of N variables)
-    for (std::size_t j = 0; j < gridSize; ++j) {
-        for (std::size_t i = 0; i < gridSize; ++i) {
+    for (std::size_t row = 0; row < gridSize; ++row) {
+        for (std::size_t col = 0; col < gridSize; ++col) {
             // Each cell has gridSize gates, at least one of which must be true
-          for (std::size_t k = 0; k < gridSize; ++k) {
-            lits.push(Lit(gates[i][j][k]));
+          for (std::size_t num = 0; num < gridSize; ++num) {
+            lits.push(Lit(gates[col][row][num]));
           }
           solver.addCNF(lits);
           lits.clear();
         }
     }
-    for (std::size_t j = 0; j < gridSize; ++j) {
-        for (std::size_t i = 0; i < gridSize; ++i) {
+    for (std::size_t row = 0; row < gridSize; ++row) {
+        for (std::size_t col = 0; col < gridSize; ++col) {
             // Each cell has gridSize gates, no two of which can be true
-          for (std::size_t k = 0; k < gridSize - 1; ++k) {
-            for (std::size_t z = k + 1; z < gridSize; ++z) {
-                lits.push(~Lit(gates[i][j][k]));
-                lits.push(~Lit(gates[i][j][z]));
+          for (std::size_t num1 = 0; num1 < gridSize - 1; ++num1) {
+            for (std::size_t num2 = num1 + 1; num2 < gridSize; ++num2) {
+                lits.push(~Lit(gates[col][row][num1]));
+                lits.push(~Lit(gates[col][row][num2]));
                 solver.addCNF(lits);
                 lits.clear();
             }
@@ -313,13 +316,13 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     }
 
     // row
-    for (std::size_t j = 0; j < gridSize; ++j) {
-        for (std::size_t k = 0; k < gridSize; ++k) {
-            // Each cell in a row must have a different value than every other 
-          for (std::size_t i = 0; i < gridSize - 1; ++i) {
-            for (std::size_t q = i + 1; q < gridSize; ++q) {
-                lits.push(~Lit(gates[i][j][k]));
-                lits.push(~Lit(gates[q][j][k]));
+    for (std::size_t row = 0; row < gridSize; ++row) {
+        // Each pair of values in a row must be different
+        for (std::size_t num = 0; num < gridSize; ++num) {
+          for (std::size_t col1 = 0; col1 < gridSize - 1; ++col1) {
+            for (std::size_t col2 = col1 + 1; col2 < gridSize; ++col2) {
+                lits.push(~Lit(gates[col1][row][num]));
+                lits.push(~Lit(gates[col2][row][num]));
                 solver.addCNF(lits);
                 lits.clear();
             }
@@ -328,13 +331,13 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     }
 
     // column
-    for (std::size_t i = 0; i < gridSize; ++i) {
-        for (std::size_t k = 0; k < gridSize; ++k) {
-            // Each cell in a column must have a different value than every other
-          for (std::size_t j = 0; j < gridSize - 1; ++j) {
-            for (std::size_t q = j + 1; q < gridSize; ++q) {
-                lits.push(~Lit(gates[i][j][k]));
-                lits.push(~Lit(gates[i][q][k]));
+    for (std::size_t col = 0; col < gridSize; ++col) {
+        // Each pair of values in a column must be different
+        for (std::size_t num = 0; num < gridSize; ++num) {
+          for (std::size_t row1 = 0; row1 < gridSize - 1; ++row1) {
+            for (std::size_t row2 = row1 + 1; row2 < gridSize; ++row2) {
+                lits.push(~Lit(gates[col][row1][num]));
+                lits.push(~Lit(gates[col][row2][num]));
                 solver.addCNF(lits);
                 lits.clear();
             }
@@ -343,48 +346,31 @@ void Sudoku::genProofModel(SatSolver& solver, Gates& gates){
     }
 
     // box
-    for (std::size_t k = 0; k < gridSize; ++k) {
-        for (std::size_t q = 0; q < boxSize; ++q) {
-          // Each cell in a box must have a different value than every other
-          for (std::size_t r = 0; r < boxSize; ++r) {
-            for (std::size_t i = 0; i < boxSize; ++i) {
-                for (std::size_t j = 0; j < boxSize; ++j) {
-                    for (std::size_t s = j + 1; s < boxSize; ++s) {
-                      lits.push(
-                          ~Lit(gates[boxSize * q + i][boxSize * r + j][k]));
-                      lits.push(
-                          ~Lit(gates[boxSize * q + i][boxSize * r + s][k]));
-                      solver.addCNF(lits);
-                      lits.clear();
-                    }
+    for (std::size_t num = 0; num < gridSize; ++num) {
+      for (std::size_t col_of_box = 0; col_of_box < boxSize; ++col_of_box) {
+        for (std::size_t row_of_box = 0; row_of_box < boxSize; ++row_of_box) {
+          for (std::size_t col1_in_box = 0; col1_in_box < boxSize;
+               ++col1_in_box) {
+            for (std::size_t row1_in_box = 0; row1_in_box < boxSize;
+                 ++row1_in_box) {
+              const std::size_t col1 = boxSize * col_of_box + col1_in_box;
+              const std::size_t row1 = boxSize * row_of_box + row1_in_box;
+              for (std::size_t col2_in_box = 0; col2_in_box < boxSize; ++col2_in_box) {
+                for (std::size_t row2_in_box = 0; row2_in_box < boxSize; ++row2_in_box) {
+                  const std::size_t col2 = boxSize * col_of_box + col2_in_box;
+                  const std::size_t row2 = boxSize * row_of_box + row2_in_box;
+                  if (row1 != row2 || col1 != col2) {
+                    lits.push(~Lit(gates[col1][row1][num]));
+                    lits.push(~Lit(gates[col2][row2][num]));
+                    solver.addCNF(lits);
+                    lits.clear();
+                  }
                 }
+              }
             }
           }
         }
-    }
-
-    // Not immediately certain what the purpose of this one is, maybe one is for rows, one for columns?
-    for (std::size_t k = 0; k < gridSize; ++k) {
-        for (std::size_t q = 0; q < boxSize; ++q) {
-          for (std::size_t r = 0; r < boxSize; ++r) {
-            for (std::size_t i = 0; i < boxSize; ++i) {
-                for (std::size_t j = 0; j < boxSize; ++j) {
-                    for (std::size_t s = i + 1; s < boxSize; ++s) {
-                      for (std::size_t t = 0; t < boxSize; ++t) {
-                        lits.push(
-                            ~Lit(gates[boxSize * q + i][boxSize * r + j][k]
-                                     ));
-                        lits.push(
-                            ~Lit(gates[boxSize * q + s][boxSize * r + t][k]
-                                     ));
-                        solver.addCNF(lits);
-                        lits.clear();
-                      }
-                    }
-                }
-            }
-          }
-        }
+      }
     }
 
     std::vector<int> numbers;
