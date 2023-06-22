@@ -101,6 +101,7 @@ void Sudoku::genPuzzle() {
   std::vector<int> cageAppeared;
   for (std::size_t j = 0; j < gridSize; ++j) {
     for (std::size_t i = 0; i < gridSize; ++i) {
+      // If this cell is already part of a cage, skip
       if (_cageId[i][j] > -1) {
         continue;
       }
@@ -115,60 +116,71 @@ void Sudoku::genPuzzle() {
 
       int sum = _grid[i][j];
 
-      std::vector<Position> temp;
+      std::vector<Position> cells_in_cage;
 
-      temp.push_back({i, j, static_cast<int>(sum)});
+      cells_in_cage.push_back({i, j, static_cast<int>(sum)});
+
+      // Numbers that have appeared in the current cage
       cageAppeared.push_back(sum);
 
-      while (temp.size() < sizeOfCage && deadLock < 1) {
-        std::size_t extPo = static_cast<std::size_t>(rand()) % temp.size();
-        std::size_t pox = temp[extPo].x;
-        std::size_t poy = temp[extPo].y;
+      while (cells_in_cage.size() < sizeOfCage && deadLock < 1) {
+        // Pick a random cell in the cage to expand from
+        std::size_t extPo =
+            static_cast<std::size_t>(rand()) % cells_in_cage.size();
+        std::size_t pox = cells_in_cage[extPo].x;
+        std::size_t poy = cells_in_cage[extPo].y;
 
         int dir = rand() % 2;
+
+        // For each direction, 3 conditions must be met:
+        // 1. There must be a cell in that direction (cannot run off the board)
+        // 2. The cell in that direction must not already be in a cage
+        // 3. The value in that cell must be different to all others in the cage
+        // If any of the conditions are not met, try a different direction
+        // until all are exhausted.
         switch (dir) {
-        case 0:
+        case 0: // +x
           if (pox < 8 && _cageId[pox + 1][poy] < 0) {
             int gridValue = _grid[pox + 1][poy];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
-              temp.push_back({pox + 1, poy, gridValue});
+              cells_in_cage.push_back({pox + 1, poy, gridValue});
               _cageId[pox + 1][poy] = currentID;
               cageAppeared.push_back(gridValue);
               sum += gridValue;
               break;
             }
           }
-        case 1:
+        case 1: // +y
           if (poy < 8 && _cageId[pox][poy + 1] < 0) {
             int gridValue = _grid[pox][poy + 1];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
-              temp.push_back({pox, poy + 1, gridValue});
+              cells_in_cage.push_back({pox, poy + 1, gridValue});
               _cageId[pox][poy + 1] = currentID;
               cageAppeared.push_back(gridValue);
               sum += gridValue;
               break;
             }
           }
-        case 2:
+        case 2: // -x
           if (pox > 1 && _cageId[pox - 1][poy] < 0) {
             int gridValue = _grid[pox - 1][poy];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
-              temp.push_back({pox - 1, poy, gridValue});
+              cells_in_cage.push_back({pox - 1, poy, gridValue});
               _cageId[pox - 1][poy] = currentID;
               cageAppeared.push_back(gridValue);
               sum += gridValue;
               break;
             }
           }
-        case 3:
+        case 3: // -y
           if (poy > 1 && _cageId[pox][poy - 1] < 0) {
             int gridValue = _grid[pox][poy - 1];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
-              temp.push_back({pox, poy - 1, gridValue});
+              cells_in_cage.push_back({pox, poy - 1, gridValue});
               _cageId[pox][poy - 1] = currentID;
               cageAppeared.push_back(gridValue);
               sum += gridValue;
@@ -181,27 +193,33 @@ void Sudoku::genPuzzle() {
         }
       }
 
-      if (temp.size() == 1) {
+      // We do not exhaust all options to reach the desired cage size, there are
+      // two things we don't do:
+      // 1. Try every direction (it is possible that the first one is skipped)
+      // 2. Try expanding from every cell (the first one that fails stops)
+      // This should be fine, as it tends to keep cells more average-sized.
+
+      if (cells_in_cage.size() == 1) {
         switch (dir) {
         case 0:
           if (i > 1 &&
               _cages[static_cast<std::size_t>(_cageId[i - 1][j])].addEle(
-                  temp[0], sum)) {
+                  cells_in_cage[0], sum)) {
             _cageId[i][j] = _cageId[i - 1][j];
             continue;
           }
         default:
           if (j > 1 &&
               _cages[static_cast<std::size_t>(_cageId[i][j - 1])].addEle(
-                  temp[0], sum)) {
+                  cells_in_cage[0], sum)) {
             _cageId[i][j] = _cageId[i][j - 1];
             continue;
           }
         }
       }
 
-      std::sort(temp.begin(), temp.end(), sortGrid);
-      _cages.push_back(Cage(currentID, sum, temp));
+      std::sort(cells_in_cage.begin(), cells_in_cage.end(), sortGrid);
+      _cages.push_back(Cage(currentID, sum, cells_in_cage));
     }
   }
 }
