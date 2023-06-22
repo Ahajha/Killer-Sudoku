@@ -293,7 +293,7 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     for (std::size_t col = 0; col < gridSize; ++col) {
       // Each cell has gridSize gates, at least one of which must be true
       for (std::size_t num = 0; num < gridSize; ++num) {
-        lits.push(Lit(gates[col][row][num]));
+        lits.push(Lit{gates[col][row][num]});
       }
       solver.addCNF(lits);
       lits.clear();
@@ -304,8 +304,8 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
       // Each cell has gridSize gates, no two of which can be true
       for (std::size_t num1 = 0; num1 < gridSize - 1; ++num1) {
         for (std::size_t num2 = num1 + 1; num2 < gridSize; ++num2) {
-          lits.push(~Lit(gates[col][row][num1]));
-          lits.push(~Lit(gates[col][row][num2]));
+          lits.push(~Lit{gates[col][row][num1]});
+          lits.push(~Lit{gates[col][row][num2]});
           solver.addCNF(lits);
           lits.clear();
         }
@@ -319,8 +319,8 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     for (std::size_t num = 0; num < gridSize; ++num) {
       for (std::size_t col1 = 0; col1 < gridSize - 1; ++col1) {
         for (std::size_t col2 = col1 + 1; col2 < gridSize; ++col2) {
-          lits.push(~Lit(gates[col1][row][num]));
-          lits.push(~Lit(gates[col2][row][num]));
+          lits.push(~Lit{gates[col1][row][num]});
+          lits.push(~Lit{gates[col2][row][num]});
           solver.addCNF(lits);
           lits.clear();
         }
@@ -334,8 +334,8 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     for (std::size_t num = 0; num < gridSize; ++num) {
       for (std::size_t row1 = 0; row1 < gridSize - 1; ++row1) {
         for (std::size_t row2 = row1 + 1; row2 < gridSize; ++row2) {
-          lits.push(~Lit(gates[col][row1][num]));
-          lits.push(~Lit(gates[col][row2][num]));
+          lits.push(~Lit{gates[col][row1][num]});
+          lits.push(~Lit{gates[col][row2][num]});
           solver.addCNF(lits);
           lits.clear();
         }
@@ -360,8 +360,8 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
                 const std::size_t col2 = boxSize * col_of_box + col2_in_box;
                 const std::size_t row2 = boxSize * row_of_box + row2_in_box;
                 if (row1 != row2 || col1 != col2) {
-                  lits.push(~Lit(gates[col1][row1][num]));
-                  lits.push(~Lit(gates[col2][row2][num]));
+                  lits.push(~Lit{gates[col1][row1][num]});
+                  lits.push(~Lit{gates[col2][row2][num]});
                   solver.addCNF(lits);
                   lits.clear();
                 }
@@ -386,8 +386,8 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
      // each num appears at most once in the cage
      for(size_t s=it->getCageSize()-1, i=0; i<s; ++i){
         for(int k=0; k<9; ++k){
-            lits.push(~Lit(gates[it->getPox(i)][it->getPoy(i)][k]));
-            lits.push(~Lit(gates[it->getPox(i+1)][it->getPoy(i+1)][k]));
+            lits.push(~Lit{gates[it->getPox(i)][it->getPoy(i)][k]});
+            lits.push(~Lit{gates[it->getPox(i+1)][it->getPoy(i+1)][k]});
             solver.addCNF(lits); lits.clear();
         }
      }
@@ -402,13 +402,13 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
       if (ans->size() == cs) {
         do {
           for (size_t i = 0; i < cs; ++i) {
-            lits.push(Lit(gates[it->getPox(i)][it->getPoy(i)][(*ans)[i] - 1]));
+            lits.push(Lit{gates[it->getPox(i)][it->getPoy(i)][(*ans)[i] - 1]});
           }
           Var v = solver.newVar();
           solver.addAND(v, lits);
           lits.clear();
 
-          validSols.push(Lit(v));
+          validSols.push(Lit{v});
         } while (next_permutation(ans->begin(), ans->end()));
       }
     }
@@ -441,7 +441,7 @@ void Sudoku::solveBySAT() {
   // Var newV = solver.newVar();
   // solver.addXorCNF(newV, gates[5]->getVar(), false, gates[8]->getVar(),
   // true);
-  
+
   vec<Lit> assumptions;
   // letting all sum condition be true
   for (std::size_t i = 0, s = _cages.size(); i < s; ++i) {

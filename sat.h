@@ -19,9 +19,9 @@ class SatSolver : public Solver {
       // fa/fb = true if it is inverted
       void addAigCNF(Var vf, Var va, bool fa, Var vb, bool fb) {
          vec<Lit> lits;
-         Lit lf = Lit(vf);
-         Lit la = fa? ~Lit(va): Lit(va);
-         Lit lb = fb? ~Lit(vb): Lit(vb);
+         Lit lf = Lit{vf};
+         Lit la = fa ? ~Lit{va} : Lit{va};
+         Lit lb = fb ? ~Lit{vb} : Lit{vb};
          lits.push(la); lits.push(~lf);
          addClause(lits); lits.clear();
          lits.push(lb); lits.push(~lf);
@@ -35,9 +35,9 @@ class SatSolver : public Solver {
       // f <-> abc 
       void addAND(Var f, const vec<Lit>& fanin){
          vec<Lit> rEq, lEq;
-         lEq.push(Lit(f));
+         lEq.push(Lit{f});
          for(size_t i=0, s=fanin.size(); i<s; ++i){
-            rEq.push(~Lit(f)); rEq.push(fanin[i]);
+            rEq.push(~Lit{f}); rEq.push(fanin[i]);
             addClause(rEq); rEq.clear();
             lEq.push(~fanin[i]);
          }
@@ -46,9 +46,9 @@ class SatSolver : public Solver {
       // f <-> a or b or c
       void addOR(Var f, const vec<Lit>& fanin){
          vec<Lit> rEq, lEq;
-         lEq.push(~Lit(f));
+         lEq.push(~Lit{f});
          for(size_t i=0, s=fanin.size(); i<s; ++i){
-            rEq.push(Lit(f)); rEq.push(~fanin[i]);
+            rEq.push(Lit{f}); rEq.push(~fanin[i]);
             addClause(rEq); rEq.clear();
             lEq.push(fanin[i]);
          }
@@ -57,9 +57,9 @@ class SatSolver : public Solver {
       // fa/fb = true if it is inverted
       void addXorCNF(Var vf, Var va, bool fa, Var vb, bool fb) {
          vec<Lit> lits;
-         Lit lf = Lit(vf);
-         Lit la = fa? ~Lit(va): Lit(va);
-         Lit lb = fb? ~Lit(vb): Lit(vb);
+         Lit lf = Lit{vf};
+         Lit la = fa ? ~Lit{va} : Lit{va};
+         Lit lb = fb ? ~Lit{vb} : Lit{vb};
          lits.push(~la); lits.push( lb); lits.push( lf);
          addClause(lits); lits.clear();
          lits.push( la); lits.push(~lb); lits.push( lf);

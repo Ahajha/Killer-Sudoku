@@ -2,6 +2,7 @@
 #define SUDOKU_H
 
 #include <array>
+#include <string>
 #include <vector>
 
 #include "gate.h"
