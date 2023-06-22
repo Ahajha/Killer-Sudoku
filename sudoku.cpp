@@ -1,13 +1,26 @@
 #include "sudoku.h"
-#include "color.h"
 
 #include <algorithm>
+#include <array>
 #include <fstream>
 #include <iomanip>
 #include <ios>
 #include <iostream>
 #include <numeric>
 #include <sstream>
+#include <string_view>
+
+namespace {
+
+constexpr std::array<std::string_view, 12> colors{
+    "LightCoral", "DarkMagenta", "DarkOrange",  "Yellow",
+    "DarkKhaki",  "Lavender",    "LightPink",   "LawnGreen",
+    "SteelBlue",  "Teal",        "SaddleBrown", "Cyan",
+};
+
+float opacity(int n) { return n % 2 ? 0.3f : 1.0f; }
+
+} // namespace
 
 using Minisat::mkLit;
 

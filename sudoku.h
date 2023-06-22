@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "gate.h"
 #include "sat.h"
+
+using Gate = Var;
 
 struct Position {
   size_t x, y;
