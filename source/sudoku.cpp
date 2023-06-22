@@ -434,17 +434,18 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     subsetSum(1, cs, sum, partial, answers);
 
     vec<Lit> validSols;
-    for (auto ans = answers.begin(); ans != answers.end(); ++ans) {
+    for (auto &ans : answers) {
       do {
-        for (size_t i = 0; i < cs; ++i) {
-          lits.push(mkLit(gates[it->getPox(i)][it->getPoy(i)][(*ans)[i] - 1]));
+        for (std::size_t i = 0; i < cs; ++i) {
+          lits.push(mkLit(gates[it->getPox(i)][it->getPoy(i)]
+                               [static_cast<std::size_t>(ans[i] - 1)]));
         }
         Var v = solver.newVar();
         solver.addAND(v, lits);
         lits.clear();
 
         validSols.push(mkLit(v));
-      } while (next_permutation(ans->begin(), ans->end()));
+      } while (std::next_permutation(ans.begin(), ans.end()));
     }
     solver.addOR(it->getGate(), validSols);
   }
