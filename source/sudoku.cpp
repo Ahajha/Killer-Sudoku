@@ -97,7 +97,6 @@ void Sudoku::printGrid() {
 
 // START: Gneerate puzzle
 void Sudoku::genPuzzle() {
-  size_t dir;
   std::vector<int> cageAppeared;
   for (std::size_t j = 0; j < gridSize; ++j) {
     for (std::size_t i = 0; i < gridSize; ++i) {
@@ -123,6 +122,8 @@ void Sudoku::genPuzzle() {
       // Numbers that have appeared in the current cage
       cageAppeared.push_back(sum);
 
+      int dir;
+
       while (cells_in_cage.size() < sizeOfCage && deadLock < 1) {
         // Pick a random cell in the cage to expand from
         std::size_t extPo =
@@ -130,7 +131,7 @@ void Sudoku::genPuzzle() {
         std::size_t pox = cells_in_cage[extPo].x;
         std::size_t poy = cells_in_cage[extPo].y;
 
-        int dir = rand() % 2;
+        dir = rand() % 2;
 
         // For each direction, 3 conditions must be met:
         // 1. There must be a cell in that direction (cannot run off the board)
