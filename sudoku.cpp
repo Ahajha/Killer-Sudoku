@@ -9,6 +9,8 @@
 #include <numeric>
 #include <sstream>
 
+using Minisat::mkLit;
+
 // START: Get grid as string in row major order
 std::string Sudoku::getGrid() {
   std::string s = "";

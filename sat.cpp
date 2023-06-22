@@ -1,5 +1,7 @@
 #include "sat.h"
 
+using Minisat::mkLit;
+
 void SatSolver::addAigCNF(Var vf, Var va, bool fa, Var vb, bool fb) {
   vec<Lit> lits;
   Lit lf = mkLit(vf);
@@ -76,6 +78,7 @@ void SatSolver::addXorCNF(Var vf, Var va, bool fa, Var vb, bool fb) {
 }
 
 int SatSolver::getValue(Var v) const {
+  using Minisat::lbool;
   return (model[v] == l_True ? 1 : (model[v] == l_False ? 0 : -1));
 }
 

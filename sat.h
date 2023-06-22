@@ -11,15 +11,12 @@
 
 #include "core/Solver.h"
 
-using Minisat::lbool;
 using Minisat::Lit;
-using Minisat::mkLit;
-using Minisat::Solver;
 using Minisat::Var;
 using Minisat::vec;
 
 /********** MiniSAT_Solver **********/
-class SatSolver : public Solver {
+class SatSolver : public Minisat::Solver {
 public:
   // Constructing proof model
 
