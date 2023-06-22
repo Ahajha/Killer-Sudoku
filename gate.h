@@ -1,8 +1,8 @@
 #ifndef GATE_H
 #define GATE_H
 
-#include <SolverTypes.h>
+#include <minisat/core/SolverTypes.h>
 
-using Gate = Var;
+using Gate = Minisat::Var;
 
 #endif

@@ -9,7 +9,14 @@
 #ifndef SAT_H
 #define SAT_H
 
-#include "Solver.h"
+#include "core/Solver.h"
+
+using Minisat::vec;
+using Minisat::Lit;
+using Minisat::mkLit;
+using Minisat::Var;
+using Minisat::Solver;
+using Minisat::lbool;
 
 /********** MiniSAT_Solver **********/
 class SatSolver : public Solver {
@@ -19,9 +26,9 @@ class SatSolver : public Solver {
       // fa/fb = true if it is inverted
       void addAigCNF(Var vf, Var va, bool fa, Var vb, bool fb) {
          vec<Lit> lits;
-         Lit lf = Lit{vf};
-         Lit la = fa ? ~Lit{va} : Lit{va};
-         Lit lb = fb ? ~Lit{vb} : Lit{vb};
+         Lit lf = mkLit(vf);
+         Lit la = fa ? ~mkLit(va) : mkLit(va);
+         Lit lb = fb ? ~mkLit(vb) : mkLit(vb);
          lits.push(la); lits.push(~lf);
          addClause(lits); lits.clear();
          lits.push(lb); lits.push(~lf);
@@ -35,9 +42,9 @@ class SatSolver : public Solver {
       // f <-> abc 
       void addAND(Var f, const vec<Lit>& fanin){
          vec<Lit> rEq, lEq;
-         lEq.push(Lit{f});
+         lEq.push(mkLit(f));
          for(size_t i=0, s=fanin.size(); i<s; ++i){
-            rEq.push(~Lit{f}); rEq.push(fanin[i]);
+            rEq.push(~mkLit(f)); rEq.push(fanin[i]);
             addClause(rEq); rEq.clear();
             lEq.push(~fanin[i]);
          }
@@ -46,9 +53,9 @@ class SatSolver : public Solver {
       // f <-> a or b or c
       void addOR(Var f, const vec<Lit>& fanin){
          vec<Lit> rEq, lEq;
-         lEq.push(~Lit{f});
+         lEq.push(~mkLit(f));
          for(size_t i=0, s=fanin.size(); i<s; ++i){
-            rEq.push(Lit{f}); rEq.push(~fanin[i]);
+            rEq.push(mkLit(f)); rEq.push(~fanin[i]);
             addClause(rEq); rEq.clear();
             lEq.push(fanin[i]);
          }
@@ -57,9 +64,9 @@ class SatSolver : public Solver {
       // fa/fb = true if it is inverted
       void addXorCNF(Var vf, Var va, bool fa, Var vb, bool fb) {
          vec<Lit> lits;
-         Lit lf = Lit{vf};
-         Lit la = fa ? ~Lit{va} : Lit{va};
-         Lit lb = fb ? ~Lit{vb} : Lit{vb};
+         Lit lf = mkLit(vf);
+         Lit la = fa ? ~mkLit(va) : mkLit(va);
+         Lit lb = fb ? ~mkLit(vb) : mkLit(vb);
          lits.push(~la); lits.push( lb); lits.push( lf);
          addClause(lits); lits.clear();
          lits.push( la); lits.push(~lb); lits.push( lf);
@@ -77,22 +84,22 @@ class SatSolver : public Solver {
                 (model[v]==l_False?0:-1));
       }
 
-      void printStats() /* const */ {
-         reportf("==============================[MINISAT]");
-         reportf("===============================\n");
-         reportf("| Conflicts |     ORIGINAL     |          ");
-         reportf("LEARNT          | Progress |\n");
-         reportf("|           | Clauses Literals | Clauses ");
-         reportf("Literals  Lit/Cl |          |\n");
-         reportf("=======================================");
-         reportf("===============================\n");
-         reportf("| %9d | %7d %8d | %7d %8d %7.1f | %6.3f %% |\n",
-                 (int)stats.conflicts, nClauses(), (int)stats.clauses_literals,
-                 nLearnts(), (int)stats.learnts_literals,
-                 (double)stats.learnts_literals / nLearnts(),
+      void printStats() const {
+         printf("==============================[MINISAT]");
+         printf("===============================\n");
+         printf("| Conflicts |     ORIGINAL     |          ");
+         printf("LEARNT          | Progress |\n");
+         printf("|           | Clauses Literals | Clauses ");
+         printf("Literals  Lit/Cl |          |\n");
+         printf("=======================================");
+         printf("===============================\n");
+         printf("| %9d | %7d %8d | %7d %8d %7.1f | %6.3f %% |\n",
+                 (int)conflicts, nClauses(), (int)clauses_literals,
+                 nLearnts(), (int)learnts_literals,
+                 (double)learnts_literals / nLearnts(),
                  progress_estimate * 100);
-         reportf("=======================================");
-         reportf("===============================\n");
+         printf("=======================================");
+         printf("===============================\n");
       }
 };
 
