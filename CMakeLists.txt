@@ -7,6 +7,7 @@ add_executable(sudoku_gen)
 target_sources(sudoku_gen PRIVATE
     sudoku.cpp
     sudokuGen.cpp
+    sat.cpp
 )
 target_compile_features(sudoku_gen PRIVATE cxx_std_20)
 set_target_properties(sudoku_gen PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
