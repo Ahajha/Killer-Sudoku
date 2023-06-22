@@ -7,7 +7,7 @@
 // START: The main function
 int main([[maybe_unused]] int argc, char const *argv[]) {
   // Initialising seed for random number generation
-  srand(time(NULL));
+  srand(static_cast<unsigned int>(time(NULL)));
 
   // Creating an instance of Sudoku
   std::cout << "======================================" << std::endl;

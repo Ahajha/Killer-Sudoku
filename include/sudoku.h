@@ -11,7 +11,7 @@ using Gate = Var;
 
 struct Position {
   size_t x, y;
-  int val;
+  unsigned int val;
 };
 
 bool sortGrid(const Position &a, const Position &b);
@@ -22,10 +22,10 @@ const size_t maxCageSizeMinus1 = 5; // gridSize - 4;
 class Cage {
 public:
   Cage(std::vector<Position> e) : _eles{std::move(e)} {}
-  Cage(int i, int s, std::vector<Position> e)
+  Cage(int i, unsigned int s, std::vector<Position> e)
       : _cageId{i}, _sum{s}, _eles{std::move(e)} {}
 
-  int getSum() const { return _sum; }
+  unsigned int getSum() const { return _sum; }
   int getID() const { return _cageId; }
   size_t getCageSize() const { return _eles.size(); }
   size_t getPox(size_t i) const { return _eles[i].x; }
@@ -35,7 +35,7 @@ public:
     Var v = s.newVar();
     _g = v;
   }
-  bool addEle(Position e, int i) {
+  bool addEle(Position e, unsigned int i) {
     if (getCageSize() > maxCageSizeMinus1) {
       return false;
     }
@@ -51,14 +51,14 @@ public:
 
 private:
   int _cageId{-1};
-  int _sum{0};
+  unsigned int _sum{0};
   std::vector<Position> _eles;
   Gate _g;
 };
 
 class Sudoku {
 private:
-  std::array<std::array<int, gridSize>, gridSize> _grid;
+  std::array<std::array<unsigned int, gridSize>, gridSize> _grid;
   // std::array<std::array<int, gridSize>, gridSize> _solnGrid;
   std::array<std::array<int, gridSize>, gridSize> _cageId;
   std::vector<Cage> _cages;

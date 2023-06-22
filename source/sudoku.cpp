@@ -20,10 +20,11 @@ constexpr std::array<std::string_view, 12> colors{
 
 float opacity(int n) { return n % 2 ? 0.3f : 1.0f; }
 
-void subsetSum(const int minValue, const std::size_t target_size,
-               const int target_sum, std::vector<int> &partial,
-               std::vector<std::vector<int>> &answer) {
-  int sum = std::accumulate(partial.begin(), partial.end(), 0);
+void subsetSum(const unsigned int minValue, const std::size_t target_size,
+               const unsigned int target_sum,
+               std::vector<unsigned int> &partial,
+               std::vector<std::vector<unsigned int>> &answer) {
+  unsigned int sum = std::accumulate(partial.begin(), partial.end(), 0u);
 
   if (sum == target_sum && partial.size() == target_size) {
     answer.push_back(partial);
@@ -97,7 +98,7 @@ void Sudoku::printGrid() {
 
 // START: Gneerate puzzle
 void Sudoku::genPuzzle() {
-  std::vector<int> cageAppeared;
+  std::vector<unsigned int> cageAppeared;
   for (std::size_t j = 0; j < gridSize; ++j) {
     for (std::size_t i = 0; i < gridSize; ++i) {
       // If this cell is already part of a cage, skip
@@ -113,11 +114,11 @@ void Sudoku::genPuzzle() {
 
       _cageId[i][j] = currentID;
 
-      int sum = _grid[i][j];
+      unsigned int sum = _grid[i][j];
 
       std::vector<Position> cells_in_cage;
 
-      cells_in_cage.push_back({i, j, static_cast<int>(sum)});
+      cells_in_cage.push_back({i, j, sum});
 
       // Numbers that have appeared in the current cage
       cageAppeared.push_back(sum);
@@ -142,7 +143,7 @@ void Sudoku::genPuzzle() {
         switch (dir) {
         case 0: // +x
           if (pox < 8 && _cageId[pox + 1][poy] < 0) {
-            int gridValue = _grid[pox + 1][poy];
+            auto gridValue = _grid[pox + 1][poy];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               cells_in_cage.push_back({pox + 1, poy, gridValue});
@@ -154,7 +155,7 @@ void Sudoku::genPuzzle() {
           }
         case 1: // +y
           if (poy < 8 && _cageId[pox][poy + 1] < 0) {
-            int gridValue = _grid[pox][poy + 1];
+            auto gridValue = _grid[pox][poy + 1];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               cells_in_cage.push_back({pox, poy + 1, gridValue});
@@ -166,7 +167,7 @@ void Sudoku::genPuzzle() {
           }
         case 2: // -x
           if (pox > 1 && _cageId[pox - 1][poy] < 0) {
-            int gridValue = _grid[pox - 1][poy];
+            auto gridValue = _grid[pox - 1][poy];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               cells_in_cage.push_back({pox - 1, poy, gridValue});
@@ -178,7 +179,7 @@ void Sudoku::genPuzzle() {
           }
         case 3: // -y
           if (poy > 1 && _cageId[pox][poy - 1] < 0) {
-            int gridValue = _grid[pox][poy - 1];
+            auto gridValue = _grid[pox][poy - 1];
             if (std::find(cageAppeared.begin(), cageAppeared.end(),
                           gridValue) == cageAppeared.end()) {
               cells_in_cage.push_back({pox, poy - 1, gridValue});
@@ -432,7 +433,7 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     }
   }
 
-  std::vector<int> partial;
+  std::vector<unsigned int> partial;
 
   // sum
   for (auto it = _cages.begin(); it != _cages.end(); ++it) {
@@ -448,8 +449,8 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     **/
 
     size_t cs = it->getCageSize();
-    int sum = it->getSum();
-    std::vector<std::vector<int>> answers;
+    auto sum = it->getSum();
+    std::vector<std::vector<unsigned int>> answers;
     subsetSum(1, cs, sum, partial, answers);
 
     vec<Lit> validSols;
@@ -514,7 +515,7 @@ void Sudoku::solveBySAT() {
   if (result) {
     for (std::size_t i = 0, n = gridSize; i < n; ++i) {
       for (std::size_t j = 0; j < gridSize; ++j) {
-        for (std::size_t k = 0; k < gridSize; ++k) {
+        for (unsigned int k = 0; k < gridSize; ++k) {
           if (solver.getValue(gates[i][j][k])) {
             _grid[i][j] = k + 1;
             break;
