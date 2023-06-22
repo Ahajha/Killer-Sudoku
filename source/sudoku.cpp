@@ -20,23 +20,22 @@ constexpr std::array<std::string_view, 12> colors{
 
 float opacity(int n) { return n % 2 ? 0.3f : 1.0f; }
 
-void subsetSum(std::vector<int> numbers, const int s, const int target,
-               std::vector<int> partial,
+void subsetSum(const int minValue, const std::size_t target_size,
+               const int target_sum, std::vector<int> &partial,
                std::vector<std::vector<int>> &answer) {
   int sum = std::accumulate(partial.begin(), partial.end(), 0);
 
-  if (sum == target) {
+  if (sum == target_sum && partial.size() == target_size) {
     answer.push_back(partial);
   }
 
-  if (sum >= target || partial.size() >= s) {
+  if (sum >= target_sum || partial.size() >= target_size) {
     return;
   }
 
-  for (auto it = numbers.begin(); it != numbers.end(); ++it) {
-    partial.push_back(*it);
-    std::vector<int> remainig(it + 1, numbers.end());
-    subsetSum(remainig, s, target, partial, answer);
+  for (auto value = minValue; value <= static_cast<int>(gridSize); ++value) {
+    partial.push_back(value);
+    subsetSum(value + 1, target_size, target_sum, partial, answer);
     partial.pop_back();
   }
 }
@@ -414,12 +413,7 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     }
   }
 
-  std::vector<int> numbers;
   std::vector<int> partial;
-
-  for (std::size_t i = 1; i <= gridSize; ++i) {
-    numbers.push_back(static_cast<int>(i));
-  }
 
   // sum
   for (auto it = _cages.begin(); it != _cages.end(); ++it) {
@@ -437,22 +431,20 @@ void Sudoku::genProofModel(SatSolver &solver, Gates &gates) {
     size_t cs = it->getCageSize();
     int sum = it->getSum();
     std::vector<std::vector<int>> answers;
-    subsetSum(numbers, cs, sum, partial, answers);
+    subsetSum(1, cs, sum, partial, answers);
+
     vec<Lit> validSols;
     for (auto ans = answers.begin(); ans != answers.end(); ++ans) {
-      if (ans->size() == cs) {
-        do {
-          for (size_t i = 0; i < cs; ++i) {
-            lits.push(
-                mkLit(gates[it->getPox(i)][it->getPoy(i)][(*ans)[i] - 1]));
-          }
-          Var v = solver.newVar();
-          solver.addAND(v, lits);
-          lits.clear();
+      do {
+        for (size_t i = 0; i < cs; ++i) {
+          lits.push(mkLit(gates[it->getPox(i)][it->getPoy(i)][(*ans)[i] - 1]));
+        }
+        Var v = solver.newVar();
+        solver.addAND(v, lits);
+        lits.clear();
 
-          validSols.push(mkLit(v));
-        } while (next_permutation(ans->begin(), ans->end()));
-      }
+        validSols.push(mkLit(v));
+      } while (next_permutation(ans->begin(), ans->end()));
     }
     solver.addOR(it->getGate(), validSols);
   }
