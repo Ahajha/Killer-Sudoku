@@ -27,7 +27,7 @@ void SatSolver::addCNF(const vec<Lit> &ps) { addClause(ps); }
 void SatSolver::addAND(Var f, const vec<Lit> &fanin) {
   vec<Lit> rEq, lEq;
   lEq.push(mkLit(f));
-  for (size_t i = 0, s = fanin.size(); i < s; ++i) {
+  for (int i = 0, s = fanin.size(); i < s; ++i) {
     rEq.push(~mkLit(f));
     rEq.push(fanin[i]);
     addClause(rEq);
@@ -40,7 +40,7 @@ void SatSolver::addAND(Var f, const vec<Lit> &fanin) {
 void SatSolver::addOR(Var f, const vec<Lit> &fanin) {
   vec<Lit> rEq, lEq;
   lEq.push(~mkLit(f));
-  for (size_t i = 0, s = fanin.size(); i < s; ++i) {
+  for (int i = 0, s = fanin.size(); i < s; ++i) {
     rEq.push(mkLit(f));
     rEq.push(~fanin[i]);
     addClause(rEq);

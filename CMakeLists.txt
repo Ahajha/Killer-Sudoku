@@ -15,5 +15,5 @@ set_target_properties(sudoku_gen PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SO
 target_link_libraries(sudoku_gen PRIVATE minisat::minisat)
 
 if (NOT MSVC)
-    #target_compile_options(sudoku_gen PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+    target_compile_options(sudoku_gen PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
 endif()

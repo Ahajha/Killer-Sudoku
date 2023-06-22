@@ -87,7 +87,8 @@ void Sudoku::genPuzzle() {
 
       int deadLock = 0;
       cageAppeared.clear();
-      std::size_t sizeOfCage = rand() % maxCageSizeMinus1 + 2;
+      std::size_t sizeOfCage =
+          static_cast<std::size_t>(rand()) % maxCageSizeMinus1 + 2;
       int currentID = static_cast<int>(_cages.size());
 
       _cageId[i][j] = currentID;
@@ -100,7 +101,7 @@ void Sudoku::genPuzzle() {
       cageAppeared.push_back(sum);
 
       while (temp.size() < sizeOfCage && deadLock < 1) {
-        std::size_t extPo = rand() % temp.size();
+        std::size_t extPo = static_cast<std::size_t>(rand()) % temp.size();
         std::size_t pox = temp[extPo].x;
         std::size_t poy = temp[extPo].y;
 
@@ -163,12 +164,16 @@ void Sudoku::genPuzzle() {
       if (temp.size() == 1) {
         switch (dir) {
         case 0:
-          if (i > 1 && _cages[_cageId[i - 1][j]].addEle(temp[0], sum)) {
+          if (i > 1 &&
+              _cages[static_cast<std::size_t>(_cageId[i - 1][j])].addEle(
+                  temp[0], sum)) {
             _cageId[i][j] = _cageId[i - 1][j];
             continue;
           }
         default:
-          if (j > 1 && _cages[_cageId[i][j - 1]].addEle(temp[0], sum)) {
+          if (j > 1 &&
+              _cages[static_cast<std::size_t>(_cageId[i][j - 1])].addEle(
+                  temp[0], sum)) {
             _cageId[i][j] = _cageId[i][j - 1];
             continue;
           }
@@ -209,7 +214,7 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
         std::stringstream text;
         text << "<rect x=\"" << x << "\" y=\"" << y
              << "\" width=\"50\" height=\"50\" style=\"fill:"
-             << colors[_cageId[i][j] % colors.size()]
+             << colors[static_cast<std::size_t>(_cageId[i][j]) % colors.size()]
              << ";opacity:" << opacity(_cageId[i][j]) << "\"/>\n";
         if (printSol) {
           text << "<text x=\"" << x + 16 << "\" y=\"" << y + 35
