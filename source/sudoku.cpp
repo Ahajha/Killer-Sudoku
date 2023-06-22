@@ -219,7 +219,7 @@ void Sudoku::genPuzzle() {
       }
 
       std::sort(cells_in_cage.begin(), cells_in_cage.end(), sortGrid);
-      _cages.push_back(Cage(currentID, sum, cells_in_cage));
+      _cages.push_back(Cage(currentID, sum, std::move(cells_in_cage)));
     }
   }
 }
