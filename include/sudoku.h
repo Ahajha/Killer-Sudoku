@@ -68,9 +68,6 @@ private:
 
   void gateInitial(SatSolver &solver, Gates &gates);
   void genProofModel(SatSolver &solver, Gates &gates);
-  void subsetSum(std::vector<int> numbers, const int &s, const int &target,
-                 std::vector<int> partial,
-                 std::vector<std::vector<int>> &answer);
 
 public:
   Sudoku();

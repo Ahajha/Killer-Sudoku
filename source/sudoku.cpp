@@ -20,6 +20,27 @@ constexpr std::array<std::string_view, 12> colors{
 
 float opacity(int n) { return n % 2 ? 0.3f : 1.0f; }
 
+void subsetSum(std::vector<int> numbers, const int s, const int target,
+               std::vector<int> partial,
+               std::vector<std::vector<int>> &answer) {
+  int sum = std::accumulate(partial.begin(), partial.end(), 0);
+
+  if (sum == target) {
+    answer.push_back(partial);
+  }
+
+  if (sum >= target || partial.size() >= s) {
+    return;
+  }
+
+  for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+    partial.push_back(*it);
+    std::vector<int> remainig(it + 1, numbers.end());
+    subsetSum(remainig, s, target, partial, answer);
+    partial.pop_back();
+  }
+}
+
 } // namespace
 
 using Minisat::mkLit;
@@ -495,26 +516,5 @@ void Sudoku::solveBySAT() {
         _grid[i][j] = 0;
       }
     }
-  }
-}
-
-void Sudoku::subsetSum(std::vector<int> numbers, const int &s,
-                       const int &target, std::vector<int> partial,
-                       std::vector<std::vector<int>> &answer) {
-  int sum = std::accumulate(partial.begin(), partial.end(), 0);
-
-  if (sum == target) {
-    answer.push_back(partial);
-  }
-
-  if (sum >= target || partial.size() >= s) {
-    return;
-  }
-
-  for (auto it = numbers.begin(); it != numbers.end(); ++it) {
-    partial.push_back(*it);
-    std::vector<int> remainig(it + 1, numbers.end());
-    subsetSum(remainig, s, target, partial, answer);
-    partial.pop_back();
   }
 }
