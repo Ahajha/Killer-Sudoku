@@ -30,7 +30,7 @@ public:
   size_t getCageSize() const { return _eles.size(); }
   size_t getPox(size_t i) const { return _eles[i].x; }
   size_t getPoy(size_t i) const { return _eles[i].y; }
-  Gate &getGate() { return _g; }
+  Gate getGate() const { return _g; }
   void setGate(SatSolver &s) {
     Var v = s.newVar();
     _g = v;

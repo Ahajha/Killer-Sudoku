@@ -270,14 +270,14 @@ void Sudoku::printSVG(std::string path, std::string svgName, bool printSol) {
     }
   }
 
-  for (auto it = _cages.begin(); it != _cages.end(); ++it) {
-    std::size_t x = 50 * it->getPoy(0) + 8;
-    std::size_t y = 50 * it->getPox(0) + 18;
+  for (const auto &cage : _cages) {
+    std::size_t x = 50 * cage.getPoy(0) + 8;
+    std::size_t y = 50 * cage.getPox(0) + 18;
 
     std::stringstream text;
     text << "<text x=\"" << x << "\" y=\"" << y
          << "\" style=\"font-weight:bold\" fill=\"red\" font-size=\"15px\">"
-         << it->getSum() << "</text>\n";
+         << cage.getSum() << "</text>\n";
     outFile << text.rdbuf();
   }
 
@@ -434,7 +434,7 @@ void Sudoku::genProofModel(SatSolver &solver) {
   std::vector<unsigned int> partial;
 
   // sum
-  for (auto it = _cages.begin(); it != _cages.end(); ++it) {
+  for (const auto &cage : _cages) {
     /** this is concerned already bellow
      // each num appears at most once in the cage
      for(size_t s=it->getCageSize()-1, i=0; i<s; ++i){
@@ -446,8 +446,8 @@ void Sudoku::genProofModel(SatSolver &solver) {
      }
     **/
 
-    size_t cs = it->getCageSize();
-    auto sum = it->getSum();
+    size_t cs = cage.getCageSize();
+    auto sum = cage.getSum();
     std::vector<std::vector<unsigned int>> answers;
     subsetSum(1, cs, sum, partial, answers);
 
@@ -455,7 +455,7 @@ void Sudoku::genProofModel(SatSolver &solver) {
     for (auto &ans : answers) {
       do {
         for (std::size_t i = 0; i < cs; ++i) {
-          lits.push(mkLit(var_of(it->getPox(i), it->getPoy(i),
+          lits.push(mkLit(var_of(cage.getPox(i), cage.getPoy(i),
                                  static_cast<std::size_t>(ans[i] - 1))));
         }
         Var v = solver.newVar();
@@ -465,7 +465,7 @@ void Sudoku::genProofModel(SatSolver &solver) {
         validSols.push(mkLit(v));
       } while (std::next_permutation(ans.begin(), ans.end()));
     }
-    solver.addOR(it->getGate(), validSols);
+    solver.addOR(cage.getGate(), validSols);
   }
 }
 
@@ -475,8 +475,8 @@ void Sudoku::solveBySAT() {
   // These should be the first var_of added, so that var_of() is correct
   gateInitial(solver);
 
-  for (size_t s = _cages.size(), i = 0; i < s; ++i) {
-    _cages[i].setGate(solver);
+  for (auto &cage : _cages) {
+    cage.setGate(solver);
   }
 
   clock_t start, end;
@@ -496,8 +496,8 @@ void Sudoku::solveBySAT() {
 
   vec<Lit> assumptions;
   // letting all sum condition be true
-  for (std::size_t i = 0, s = _cages.size(); i < s; ++i) {
-    assumptions.push(mkLit(_cages[i].getGate()));
+  for (const auto &cage : _cages) {
+    assumptions.push(mkLit(cage.getGate()));
   }
   // solver.assumeProperty(newV, true);  // k = 1
   start = clock();
@@ -510,7 +510,7 @@ void Sudoku::solveBySAT() {
   solver.printStats();
   std::cout << (result ? "SAT" : "UNSAT") << std::endl;
   if (result) {
-    for (std::size_t i = 0, n = gridSize; i < n; ++i) {
+    for (std::size_t i = 0; i < gridSize; ++i) {
       for (std::size_t j = 0; j < gridSize; ++j) {
         for (unsigned int k = 0; k < gridSize; ++k) {
           if (solver.getValue(var_of(i, j, k))) {
