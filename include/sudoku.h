@@ -63,11 +63,8 @@ private:
   std::array<std::array<int, gridSize>, gridSize> _cageId;
   std::vector<Cage> _cages;
 
-  using Gates =
-      std::array<std::array<std::array<Gate, gridSize>, gridSize>, gridSize>;
-
-  void gateInitial(SatSolver &solver, Gates &gates);
-  void genProofModel(SatSolver &solver, Gates &gates);
+  void gateInitial(SatSolver &solver);
+  void genProofModel(SatSolver &solver);
 
 public:
   Sudoku();
